@@ -37,15 +37,14 @@
 #include "aboutwindow.h"
 #include "framelesswindow.h"
 
+#include "lineedit.h"
+
 namespace Ui {
 class MainWindow;
 }
 
-#if defined(Q_OS_LINUX)
+
 class MainWindow : public QMainWindow
-#else
-class MainWindow : public CFramelessWindow
-#endif
 {
     Q_OBJECT
 
@@ -113,11 +112,16 @@ private:
     QPushButton* m_greenMaximizeButton;
     QPushButton* m_redCloseButton;
     QPushButton* m_yellowMinimizeButton;
-    QHBoxLayout m_trafficLightLayout;
+//    QHBoxLayout m_trafficLightLayout;
     QPushButton* m_newNoteButton;
     QPushButton* m_trashButton;
     QPushButton* m_dotsButton;
-    QPushButton* m_styleEditorButton;
+    QPushButton* m_unorderedButton;
+    QPushButton* m_boldButton;
+    QPushButton* m_italicButton;
+    QPushButton* m_underlineButton;
+    QPushButton* m_strikeButton;
+    QPushButton* m_embedImageButton;
     CustomDocument* m_textEdit;
     QLineEdit* m_searchEdit;
     QLabel* m_editorDateLabel;
@@ -127,6 +131,12 @@ private:
     QAction* m_restoreAction;
     QAction* m_quitAction;
     QMenu* m_trayIconMenu;
+
+    bool isX11_, isWayland_;
+
+    LineEdit *ImagePathEntry_;
+    int imgScale_;
+    QString lastImgPath_;
 
     NoteView* m_noteView;
     NoteModel* m_noteModel;
@@ -242,17 +252,39 @@ private:
 
     void setMargins(QMargins margins);
 
+    // New
+    void mergeFormatOnWordOrSelection (const QTextCharFormat &format);
+    void formatChanged (const QTextCharFormat &format);
+    void makeBold();
+    void makeItalic();
+    void makeUnderlined();
+    void makeStriked();
+    void embedImage();
+    void makeUnorderedList();
+
+    void imageEmbed (const QString &path);
+
 private slots:
     void InitData();
     void loadNotes(QList<NoteData *> noteList, int noteCounter);
     void onNewNoteButtonPressed();
     void onNewNoteButtonClicked();
+    void onUnorderedButtonPressed();
+    void onUnorderedButtonClicked();
     void onTrashButtonPressed();
     void onTrashButtonClicked();
+    void onEmbedImageButtonPressed();
+    void onEmbedImageButtonClicked();
     void onDotsButtonPressed();
     void onDotsButtonClicked();
     void onStyleEditorButtonPressed();
     void onStyleEditorButtonClicked();
+    void onItalicButtonPressed();
+    void onItalicButtonClicked();
+    void onUnderlineButtonPressed();
+    void onUnderlineButtonClicked();
+    void onStrikeButtonPressed();
+    void onStrikeButtonClicked();
     void onNotePressed(const QModelIndex &index);
     void onTextEditTextChanged();
     void onSearchEditTextChanged(const QString& keyword);
@@ -294,6 +326,7 @@ private slots:
     void resetEditorToDefaultSettings();
     void setTheme(Theme theme);
     void createOrSelectFirstNote();
+    void setImagePath(bool);
 
 signals:
     void requestNotesList();

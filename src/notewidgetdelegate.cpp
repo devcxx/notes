@@ -12,7 +12,7 @@ NoteWidgetDelegate::NoteWidgetDelegate(QObject *parent)
 #ifdef __APPLE__
       m_displayFont(QFont(QStringLiteral("SF Pro Text")).exactMatch() ? QStringLiteral("SF Pro Text") : QStringLiteral("Roboto")),
 #elif _WIN32
-      m_displayFont(QFont(QStringLiteral("Segoe UI")).exactMatch() ? QStringLiteral("Segoe UI") : QStringLiteral("Roboto")),
+      m_displayFont(QFont(QStringLiteral("Microsoft YaHei")).exactMatch() ? QStringLiteral("Microsoft YaHei") : QStringLiteral("Roboto")),
 #else
       m_displayFont(QStringLiteral("Roboto")),
 #endif
@@ -24,7 +24,7 @@ NoteWidgetDelegate::NoteWidgetDelegate(QObject *parent)
 #else
       m_titleFont(m_displayFont, 10, 60),
       m_titleSelectedFont(m_displayFont, 10),
-      m_dateFont(m_displayFont, 10),
+      m_dateFont(m_displayFont, 8),
 #endif
       m_titleColor(26, 26, 26),
       m_dateColor(132, 132, 132),
@@ -34,7 +34,7 @@ NoteWidgetDelegate::NoteWidgetDelegate(QObject *parent)
       m_applicationInactiveColor(207, 207, 207),
       m_separatorColor(221, 221, 221),
       m_defaultColor(255, 255, 255),
-      m_rowHeight(42),
+      m_rowHeight(50),
       m_maxFrame(200),
       m_rowRightOffset(0),
       m_state(Normal),
@@ -169,9 +169,9 @@ void NoteWidgetDelegate::paintBackground(QPainter *painter, const QStyleOptionVi
 
 void NoteWidgetDelegate::paintLabels(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-    const int leftOffsetX = 10;
-    const int topOffsetY = 5;   // space on top of title
-    const int spaceY = 1;       // space between title and date
+    const int leftOffsetX = 16;
+    const int topOffsetY = 10;   // space on top of title
+    const int spaceY = 4;       // space between title and date
 
     QString title{index.data(NoteModel::NoteFullTitle).toString()};
     QFont titleFont = (option.state & QStyle::State_Selected) == QStyle::State_Selected ? m_titleSelectedFont : m_titleFont;
@@ -257,7 +257,7 @@ void NoteWidgetDelegate::paintSeparator(QPainter*painter, const QStyleOptionView
 
 QString NoteWidgetDelegate::parseDateTime(const QDateTime &dateTime) const
 {
-    QLocale usLocale(QLocale("en_US"));
+    QLocale usLocale(QLocale("zh_CN"));
 
     auto currDateTime = QDateTime::currentDateTime();
 

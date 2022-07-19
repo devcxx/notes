@@ -3,8 +3,9 @@
 
 #include <QtGui>
 #include <QTextEdit>
+#include "textedit.h"
 
-class CustomDocument : public QTextEdit
+class CustomDocument : public TextEdit
 {
     Q_OBJECT
 public:

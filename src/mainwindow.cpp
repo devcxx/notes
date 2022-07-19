@@ -5,22 +5,25 @@
 ***************************************************************************************/
 
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include "notewidgetdelegate.h"
-#include "qxtglobalshortcut.h"
+#include "ui_mainwindow.h"
+//#include "qxtglobalshortcut.h"
+#include "filedialog.h"
+#include "spinbox.h"
+#include "svgicons.h"
 #include "updaterwindow.h"
 
+#include <QDesktopWidget>
+#include <QFileDialog>
+#include <QList>
+#include <QMessageBox>
+#include <QProgressDialog>
+#include <QScrollArea>
 #include <QScrollBar>
 #include <QShortcut>
 #include <QTextStream>
-#include <QScrollArea>
-#include <QtConcurrent>
-#include <QProgressDialog>
-#include <QDesktopWidget>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QList>
 #include <QWidgetAction>
+#include <QtConcurrent>
 
 #define FIRST_LINE_MAX 80
 
@@ -29,81 +32,111 @@
  * \param parent
  */
 #if defined(Q_OS_LINUX)
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow (parent),
-    #else
-MainWindow::MainWindow(QWidget *parent) :
-    CFramelessWindow (parent),
+MainWindow::MainWindow(QWidget* parent)
+    : QMainWindow(parent)
+    ,
+#else
+MainWindow::MainWindow(QWidget* parent)
+    : QMainWindow(parent)
+    ,
 #endif
-    ui (new Ui::MainWindow),
-    m_autoSaveTimer(new QTimer(this)),
-    m_settingsDatabase(Q_NULLPTR),
-    m_clearButton(Q_NULLPTR),
-    m_greenMaximizeButton(Q_NULLPTR),
-    m_redCloseButton(Q_NULLPTR),
-    m_yellowMinimizeButton(Q_NULLPTR),
-    m_trafficLightLayout(Q_NULLPTR),
-    m_newNoteButton(Q_NULLPTR),
-    m_trashButton(Q_NULLPTR),
-    m_dotsButton(Q_NULLPTR),
-    m_styleEditorButton(Q_NULLPTR),
-    m_textEdit(Q_NULLPTR),
-    m_searchEdit(Q_NULLPTR),
-    m_editorDateLabel(Q_NULLPTR),
-    m_splitter(Q_NULLPTR),
-    m_trayIcon(new QSystemTrayIcon(this)),
-    m_restoreAction(new QAction(tr("&Hide Notes"), this)),
-    m_quitAction(new QAction(tr("&Quit"), this)),
-    m_trayIconMenu(new QMenu(this)),
-    m_noteView(Q_NULLPTR),
-    m_noteModel(new NoteModel(this)),
-    m_deletedNotesModel(new NoteModel(this)),
-    m_proxyModel(new QSortFilterProxyModel(this)),
-    m_dbManager(Q_NULLPTR),
-    m_dbThread(Q_NULLPTR),
-    m_styleEditorWindow(this),
-    m_aboutWindow(this),
-    m_noteCounter(0),
-    m_trashCounter(0),
-    m_layoutMargin(10),
-    m_shadowWidth(10),
-    m_noteListWidth(200),
-    m_smallEditorWidth(420),
-    m_largeEditorWidth(1250),
-    m_canMoveWindow(false),
-    m_canStretchWindow(false),
-    m_isTemp(false),
-    m_isListViewScrollBarHidden(true),
-    m_isContentModified(false),
-    m_isOperationRunning(false),
-    m_dontShowUpdateWindow(false),
-    m_alwaysStayOnTop(false),
-    m_useNativeWindowFrame(false),
-    m_listOfSerifFonts({QStringLiteral("Trykker"), QStringLiteral("PT Serif"), QStringLiteral("Mate")}),
-    m_listOfSansSerifFonts({QStringLiteral("Source Sans Pro"), QStringLiteral("Roboto"), QStringLiteral("Jost")}),
-    m_listOfMonoFonts({QStringLiteral("iA Writer Mono S"), QStringLiteral("iA Writer Duo S"), QStringLiteral("iA Writer Quattro S")}),
-    m_chosenSerifFontIndex(0),
-    m_chosenSansSerifFontIndex(0),
-    m_chosenMonoFontIndex(0),
-    m_currentCharsLimitPerFont({ 64    // Mono    TODO: is this the proper way to initialize?
-                               , 80    // Serif
-                               , 80}), // SansSerif
-    m_currentFontTypeface(FontTypeface::SansSerif),
+    ui(new Ui::MainWindow)
+    , m_autoSaveTimer(new QTimer(this))
+    , m_settingsDatabase(Q_NULLPTR)
+    , m_clearButton(Q_NULLPTR)
+    , m_greenMaximizeButton(Q_NULLPTR)
+    , m_redCloseButton(Q_NULLPTR)
+    , m_yellowMinimizeButton(Q_NULLPTR)
+    ,
+    //    m_trafficLightLayout(Q_NULLPTR),
+    m_newNoteButton(Q_NULLPTR)
+    , m_trashButton(Q_NULLPTR)
+    , m_dotsButton(Q_NULLPTR)
+    , m_unorderedButton(Q_NULLPTR)
+    , m_boldButton(Q_NULLPTR)
+    , m_italicButton(Q_NULLPTR)
+    , m_underlineButton(Q_NULLPTR)
+    , m_strikeButton(Q_NULLPTR)
+    , m_embedImageButton(Q_NULLPTR)
+    , m_textEdit(Q_NULLPTR)
+    , m_searchEdit(Q_NULLPTR)
+    , m_editorDateLabel(Q_NULLPTR)
+    , m_splitter(Q_NULLPTR)
+    , m_trayIcon(new QSystemTrayIcon(this))
+    , m_restoreAction(new QAction(tr("&Hide Notes"), this))
+    , m_quitAction(new QAction(tr("&Quit"), this))
+    , m_trayIconMenu(new QMenu(this))
+    , m_noteView(Q_NULLPTR)
+    , m_noteModel(new NoteModel(this))
+    , m_deletedNotesModel(new NoteModel(this))
+    , m_proxyModel(new QSortFilterProxyModel(this))
+    , m_dbManager(Q_NULLPTR)
+    , m_dbThread(Q_NULLPTR)
+    , m_aboutWindow(this)
+    , m_noteCounter(0)
+    , m_trashCounter(0)
+    , m_layoutMargin(10)
+    , m_shadowWidth(10)
+    , m_noteListWidth(200)
+    , m_smallEditorWidth(420)
+    , m_largeEditorWidth(1250)
+    , m_canMoveWindow(false)
+    , m_canStretchWindow(false)
+    , m_isTemp(false)
+    , m_isListViewScrollBarHidden(true)
+    , m_isContentModified(false)
+    , m_isOperationRunning(false)
+    , m_dontShowUpdateWindow(false)
+    , m_alwaysStayOnTop(false)
+    , m_useNativeWindowFrame(true)
+    , m_listOfSerifFonts({ QStringLiteral("Trykker"), QStringLiteral("PT Serif"), QStringLiteral("Mate") })
+    , m_listOfSansSerifFonts({ QStringLiteral("Source Sans Pro"), QStringLiteral("Roboto"), QStringLiteral("Jost") })
+    , m_listOfMonoFonts({ QStringLiteral("iA Writer Mono S"), QStringLiteral("iA Writer Duo S"), QStringLiteral("iA Writer Quattro S") })
+    , m_chosenSerifFontIndex(0)
+    , m_chosenSansSerifFontIndex(0)
+    , m_chosenMonoFontIndex(0)
+    , m_currentCharsLimitPerFont({ 64 // Mono    TODO: is this the proper way to initialize?
+          ,
+          80 // Serif
+          ,
+          80 })
+    , // SansSerif
+    m_currentFontTypeface(FontTypeface::SansSerif)
+    ,
 #ifdef __APPLE__
-    m_displayFont(QFont(QStringLiteral("SF Pro Text")).exactMatch() ? QStringLiteral("SF Pro Text") : QStringLiteral("Roboto")),
+    m_displayFont(QFont(QStringLiteral("SF Pro Text")).exactMatch() ? QStringLiteral("SF Pro Text") : QStringLiteral("Roboto"))
+    ,
 #elif _WIN32
-    m_displayFont(QFont(QStringLiteral("Segoe UI")).exactMatch() ? QStringLiteral("Segoe UI") : QStringLiteral("Roboto")),
+    m_displayFont(QFont(QStringLiteral("Microsoft YaHei")).exactMatch() ? QStringLiteral("Microsoft YaHei") : QStringLiteral("Roboto"))
+    ,
 #else
     m_displayFont(QStringLiteral("Roboto")),
 #endif
-    m_currentEditorBackgroundColor(247, 247, 247),
-    m_currentRightFrameColor(247, 247, 247),
-    m_currentTheme(Theme::Light),
-    m_currentEditorTextColor(247, 247, 247),
-    m_currentThemeBackgroundColor(247, 247, 247),
-    m_areNonEditorWidgetsVisible(true),
-    m_isFrameRightTopWidgetsVisible(true)
+    m_currentEditorBackgroundColor(247, 247, 247)
+    , m_currentRightFrameColor(247, 247, 247)
+    , m_currentTheme(Theme::Light)
+    , m_currentEditorTextColor(247, 247, 247)
+    , m_currentThemeBackgroundColor(247, 247, 247)
+    , m_areNonEditorWidgetsVisible(true)
+    , m_isFrameRightTopWidgetsVisible(true)
 {
+#ifdef HAS_X11
+#if defined Q_OS_LINUX || defined Q_OS_FREEBSD || defined Q_OS_OPENBSD || defined Q_OS_NETBSD || defined Q_OS_HURD
+    isX11_ = (QString::compare(QGuiApplication::platformName(), "xcb", Qt::CaseInsensitive) == 0);
+#else
+    isX11_ = false;
+#endif // defined Q_WS_X11
+#else
+    isX11_ = false;
+#endif // HAS_X11
+
+    if (isX11_)
+        isWayland_ = false;
+    else
+        isWayland_ = (QString::compare(QGuiApplication::platformName(), "wayland", Qt::CaseInsensitive) == 0);
+
+    imgScale_ = 100;
+
     ui->setupUi(this);
     setupMainWindow();
     setupFonts();
@@ -113,7 +146,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setupSplitter();
     setupLine();
     setupRightFrame();
-    setupTitleBarButtons();
+    //    setupTitleBarButtons();
     setupSearchEdit();
     setupTextEdit();
     setupDatabases();
@@ -124,7 +157,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_highlighter = new MarkdownHighlighter(m_textEdit->document());
 
-    QTimer::singleShot(200,this, SLOT(InitData()));
+    QTimer::singleShot(200, this, SLOT(InitData()));
 }
 
 /*!
@@ -140,7 +173,7 @@ void MainWindow::InitData()
 
     bool exist = (QFile::exists(oldNoteDBPath) || QFile::exists(oldTrashDBPath));
 
-    if(exist){
+    if (exist) {
         QProgressDialog* pd = new QProgressDialog(tr("Migrating database, please wait."), QString(), 0, 0, this);
         pd->setCancelButton(Q_NULLPTR);
         pd->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
@@ -150,7 +183,7 @@ void MainWindow::InitData()
         setButtonsAndFieldsEnabled(false);
 
         QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-        connect(watcher, &QFutureWatcher<void>::finished, this, [&, pd](){
+        connect(watcher, &QFutureWatcher<void>::finished, this, [&, pd]() {
             pd->deleteLater();
             setButtonsAndFieldsEnabled(true);
             emit requestNotesList();
@@ -175,13 +208,13 @@ void MainWindow::InitData()
  */
 void MainWindow::setMainWindowVisibility(bool state)
 {
-    if(state){
+    if (state) {
         show();
         qApp->processEvents();
         qApp->setActiveWindow(this);
         qApp->processEvents();
         m_restoreAction->setText(tr("&Hide Notes"));
-    }else{
+    } else {
         m_restoreAction->setText(tr("&Show Notes"));
         hide();
     }
@@ -193,27 +226,27 @@ void MainWindow::setMainWindowVisibility(bool state)
  */
 void MainWindow::paintEvent(QPaintEvent* event)
 {
-#if !defined(__APPLE__) && !defined(Q_OS_LINUX)
-    if (!m_useNativeWindowFrame) {
-        QPainter painter(this);
-        painter.save();
+    //#if !defined(__APPLE__) && !defined(Q_OS_LINUX)
+    //    if (!m_useNativeWindowFrame) {
+    //        QPainter painter(this);
+    //        painter.save();
 
-        painter.setRenderHint(QPainter::Antialiasing);
-        painter.setPen(Qt::NoPen);
+    //        painter.setRenderHint(QPainter::Antialiasing);
+    //        painter.setPen(Qt::NoPen);
 
-        dropShadow(painter, ShadowType::Linear, ShadowSide::Left  );
-        dropShadow(painter, ShadowType::Linear, ShadowSide::Top   );
-        dropShadow(painter, ShadowType::Linear, ShadowSide::Right );
-        dropShadow(painter, ShadowType::Linear, ShadowSide::Bottom);
+    //        dropShadow(painter, ShadowType::Linear, ShadowSide::Left  );
+    //        dropShadow(painter, ShadowType::Linear, ShadowSide::Top   );
+    //        dropShadow(painter, ShadowType::Linear, ShadowSide::Right );
+    //        dropShadow(painter, ShadowType::Linear, ShadowSide::Bottom);
 
-        dropShadow(painter, ShadowType::Radial, ShadowSide::TopLeft    );
-        dropShadow(painter, ShadowType::Radial, ShadowSide::TopRight   );
-        dropShadow(painter, ShadowType::Radial, ShadowSide::BottomRight);
-        dropShadow(painter, ShadowType::Radial, ShadowSide::BottomLeft );
+    //        dropShadow(painter, ShadowType::Radial, ShadowSide::TopLeft    );
+    //        dropShadow(painter, ShadowType::Radial, ShadowSide::TopRight   );
+    //        dropShadow(painter, ShadowType::Radial, ShadowSide::BottomRight);
+    //        dropShadow(painter, ShadowType::Radial, ShadowSide::BottomLeft );
 
-        painter.restore();
-    }
-#endif
+    //        painter.restore();
+    //    }
+    //#endif
 
     QMainWindow::paintEvent(event);
 }
@@ -224,10 +257,10 @@ void MainWindow::paintEvent(QPaintEvent* event)
  */
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
-    if(m_splitter != Q_NULLPTR){
+    if (m_splitter != Q_NULLPTR) {
         //restore note list width
         QList<int> sizes = m_splitter->sizes();
-        if(sizes.at(0) != 0){
+        if (sizes.at(0) != 0) {
             sizes[0] = m_noteListWidth;
             sizes[1] = m_splitter->width() - m_noteListWidth;
             m_splitter->setSizes(sizes);
@@ -257,22 +290,22 @@ MainWindow::~MainWindow()
 void MainWindow::setupMainWindow()
 {
 #if defined(Q_OS_LINUX)
-    this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+//    this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 //    this->setAttribute(Qt::WA_TranslucentBackground);
 #elif _WIN32
-    this->setWindowFlags(Qt::CustomizeWindowHint);
+//    this->setWindowFlags(Qt::CustomizeWindowHint);
 #endif
 
-    m_greenMaximizeButton = new QPushButton(this);
-    m_redCloseButton = new QPushButton(this);
-    m_yellowMinimizeButton = new QPushButton(this);
+//    m_greenMaximizeButton = new QPushButton(this);
+//    m_redCloseButton = new QPushButton(this);
+//    m_yellowMinimizeButton = new QPushButton(this);
 #ifndef __APPLE__
 //    If we want to align window buttons with searchEdit and notesList
 //    QSpacerItem *horizontialSpacer = new QSpacerItem(3, 0, QSizePolicy::Minimum, QSizePolicy::Minimum);
 //    m_trafficLightLayout.addSpacerItem(horizontialSpacer);
-    m_trafficLightLayout.addWidget(m_redCloseButton);
-    m_trafficLightLayout.addWidget(m_yellowMinimizeButton);
-    m_trafficLightLayout.addWidget(m_greenMaximizeButton);
+//    m_trafficLightLayout.addWidget(m_redCloseButton);
+//    m_trafficLightLayout.addWidget(m_yellowMinimizeButton);
+//    m_trafficLightLayout.addWidget(m_greenMaximizeButton);
 #else
     this->setCloseBtnQuit(false);
     m_layoutMargin = 0;
@@ -282,26 +315,36 @@ void MainWindow::setupMainWindow()
 #endif
 
 #ifdef _WIN32
-    m_trafficLightLayout.setSpacing(0);
-    m_trafficLightLayout.setMargin(0);
-    m_trafficLightLayout.setGeometry(QRect(2,2,90,16));
+//    m_trafficLightLayout.setSpacing(0);
+//    m_trafficLightLayout.setMargin(0);
+//    m_trafficLightLayout.setGeometry(QRect(2,2,90,16));
 #endif
 
     m_newNoteButton = ui->newNoteButton;
     m_trashButton = ui->trashButton;
     m_dotsButton = ui->dotsButton;
-    m_styleEditorButton = ui->styleEditorButton;
+    m_italicButton = ui->italicButton;
+    m_underlineButton = ui->underlineButton;
+    m_unorderedButton = ui->unorderedButton;
+    m_unorderedButton->setCheckable(true);
+    m_italicButton->setCheckable(true);
+    m_underlineButton->setCheckable(true);
+    m_strikeButton = ui->strikeButton;
+    m_strikeButton->setCheckable(true);
+    m_boldButton = ui->boldButton;
+    m_boldButton->setCheckable(true);
+    m_embedImageButton = ui->embedImageButton;
     m_searchEdit = ui->searchEdit;
     m_textEdit = ui->textEdit;
     m_editorDateLabel = ui->editorDateLabel;
     m_splitter = ui->splitter;
 
 #if defined(Q_OS_LINUX)
-//    QMargins margins(m_layoutMargin, m_layoutMargin, m_layoutMargin, m_layoutMargin);
-//    setMargins(margins);
-    setMargins(QMargins(0,0,0,0));
+    //    QMargins margins(m_layoutMargin, m_layoutMargin, m_layoutMargin, m_layoutMargin);
+    //    setMargins(margins);
+    setMargins(QMargins(0, 0, 0, 0));
 #elif _WIN32
-    ui->verticalSpacer->changeSize(0, 7, QSizePolicy::Fixed, QSizePolicy::Fixed);
+    //    ui->verticalSpacer->changeSize(0, 7, QSizePolicy::Fixed, QSizePolicy::Fixed);
     ui->verticalSpacer_upEditorDateLabel->changeSize(0, 27, QSizePolicy::Fixed, QSizePolicy::Fixed);
 #endif
     ui->frame->installEventFilter(this);
@@ -319,22 +362,50 @@ void MainWindow::setupMainWindow()
     m_newNoteButton->setToolTip(tr("Create New Note"));
     m_trashButton->setToolTip(tr("Delete Selected Note"));
     m_dotsButton->setToolTip(tr("Open Menu"));
-    m_styleEditorButton->setToolTip(tr("Style The Editor"));
+    m_boldButton->setToolTip(tr("Bold"));
+    m_italicButton->setToolTip(tr("Italic"));
+    m_underlineButton->setToolTip(tr("Underline"));
+    m_strikeButton->setToolTip(tr("Strike through"));
+    m_embedImageButton->setToolTip(tr("Embed Image"));
+    m_unorderedButton->setToolTip(tr("Unordered List"));
 
-    m_styleEditorButton->setText(QStringLiteral("Aa"));
+    m_boldButton->setText(QStringLiteral("B"));
+    m_italicButton->setText(QStringLiteral("I"));
+    m_underlineButton->setText(QStringLiteral("U"));
+    m_strikeButton->setText(QStringLiteral("S"));
+
 #if __APPLE__
-    m_styleEditorButton->setFont(QFont(QStringLiteral("Roboto"), 20, QFont::Bold));
+    m_boldButton->setFont(QFont(QStringLiteral("Roboto"), 20, QFont::Bold));
+    m_italicButton->setFont(QFont(QStringLiteral("Roboto"), 20, QFont::Bold, true));
+    QFont underlineFont(QStringLiteral("Roboto"), 20, QFont::Bold);
+    underlineFont.setUnderline(true);
+    m_underlineButton->setFont(underlineFont);
 #else
-    m_styleEditorButton->setFont(QFont(QStringLiteral("Roboto"), 16, QFont::Bold));
-
+    m_boldButton->setFont(QFont(QStringLiteral("Roboto"), 16, QFont::Bold));
+    m_italicButton->setFont(QFont(QStringLiteral("Roboto"), 16, QFont::Bold, true));
+    QFont underlineFont(QStringLiteral("Roboto"), 16, QFont::Bold);
+    underlineFont.setUnderline(true);
+    m_underlineButton->setFont(underlineFont);
+    QFont strikeFont(QStringLiteral("Roboto"), 16, QFont::Bold);
+    strikeFont.setStrikeOut(true);
+    m_strikeButton->setFont(strikeFont);
 #endif
     QString ss = QStringLiteral("QPushButton { "
-                 "  border: none; "
-                 "  padding: 0px; "
-                 "  color: rgb(68, 138, 201);"
-                 "}");
-    m_styleEditorButton->setStyleSheet(ss);
-    m_styleEditorButton->installEventFilter(this);
+                                "  border: none; "
+                                "  padding: 0px; "
+                                "  color: rgb(68, 138, 201);"
+                                "}");
+    m_boldButton->setStyleSheet(ss);
+    m_boldButton->installEventFilter(this);
+
+    m_italicButton->setStyleSheet(ss);
+    m_italicButton->installEventFilter(this);
+
+    m_underlineButton->setStyleSheet(ss);
+    m_underlineButton->installEventFilter(this);
+
+    m_strikeButton->setStyleSheet(ss);
+    m_strikeButton->installEventFilter(this);
 }
 
 /*!
@@ -393,31 +464,31 @@ void MainWindow::setupKeyboardShortcuts()
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_J), this, SLOT(toggleNoteList()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S), this, SLOT(onStyleEditorButtonClicked()));
 
-    QxtGlobalShortcut *shortcut = new QxtGlobalShortcut(this);
-#if defined(Q_OS_LINUX)
-    shortcut->setShortcut(QKeySequence(QStringLiteral("META+SHIFT+N")));
-#else
-    shortcut->setShortcut(QKeySequence(QStringLiteral("META+N")));
-#endif
-    connect(shortcut, &QxtGlobalShortcut::activated,[=]() {
-        // workaround prevent textEdit and searchEdit
-        // from taking 'N' from shortcut
-        m_textEdit->setDisabled(true);
-        m_searchEdit->setDisabled(true);
-        setMainWindowVisibility(isHidden()
-                                || windowState() == Qt::WindowMinimized
-                                || qApp->applicationState() == Qt::ApplicationInactive);
-        if(isHidden()
-                || windowState() == Qt::WindowMinimized
-                || qApp->applicationState() == Qt::ApplicationInactive)
-#ifdef __APPLE__
-            this->raise();
-#else
-            this->activateWindow();
-#endif
-        m_textEdit->setDisabled(false);
-        m_searchEdit->setDisabled(false);
-    });
+    //    QxtGlobalShortcut *shortcut = new QxtGlobalShortcut(this);
+    //#if defined(Q_OS_LINUX)
+    //    shortcut->setShortcut(QKeySequence(QStringLiteral("META+SHIFT+N")));
+    //#else
+    //    shortcut->setShortcut(QKeySequence(QStringLiteral("META+N")));
+    //#endif
+    //    connect(shortcut, &QxtGlobalShortcut::activated,[=]() {
+    //        // workaround prevent textEdit and searchEdit
+    //        // from taking 'N' from shortcut
+    //        m_textEdit->setDisabled(true);
+    //        m_searchEdit->setDisabled(true);
+    //        setMainWindowVisibility(isHidden()
+    //                                || windowState() == Qt::WindowMinimized
+    //                                || qApp->applicationState() == Qt::ApplicationInactive);
+    //        if(isHidden()
+    //                || windowState() == Qt::WindowMinimized
+    //                || qApp->applicationState() == Qt::ApplicationInactive)
+    //#ifdef __APPLE__
+    //            this->raise();
+    //#else
+    //            this->activateWindow();
+    //#endif
+    //        m_textEdit->setDisabled(false);
+    //        m_searchEdit->setDisabled(false);
+    //    });
 }
 
 /*!
@@ -431,18 +502,23 @@ void MainWindow::setupKeyboardShortcuts()
 void MainWindow::setupNewNoteButtonAndTrahButton()
 {
     QString ss = QStringLiteral("QPushButton { "
-                 "  border: none; "
-                 "  padding: 0px; "
-                 "}");
+                                "  border: none; "
+                                "  padding: 0px; "
+                                "}");
 
     m_newNoteButton->setStyleSheet(ss);
     m_trashButton->setStyleSheet(ss);
     m_dotsButton->setStyleSheet(ss);
+    m_embedImageButton->setStyleSheet(ss);
+    m_unorderedButton->setStyleSheet(ss);
 
     m_newNoteButton->installEventFilter(this);
     m_trashButton->installEventFilter(this);
+    m_embedImageButton->installEventFilter(this);
     m_dotsButton->installEventFilter(this);
-    m_styleEditorButton->installEventFilter(this);
+    m_boldButton->installEventFilter(this);
+    m_italicButton->installEventFilter(this);
+    m_unorderedButton->installEventFilter(this);
 }
 
 /*!
@@ -478,9 +554,10 @@ void MainWindow::setupRightFrame()
     ui->frameRightTop->installEventFilter(this);
 
     QString ss = QStringLiteral("QFrame{ "
-                 "  background-color: %1; "
-                 "  border: none;"
-                 "}").arg(m_currentRightFrameColor.name());
+                                "  background-color: %1; "
+                                "  border: none;"
+                                "}")
+                     .arg(m_currentRightFrameColor.name());
     ui->frameRight->setStyleSheet(ss);
 }
 
@@ -493,9 +570,9 @@ void MainWindow::setupRightFrame()
 void MainWindow::setupTitleBarButtons()
 {
     QString ss = QStringLiteral("QPushButton { "
-                 "  border: none; "
-                 "  padding: 0px; "
-                 "}");
+                                "  border: none; "
+                                "  padding: 0px; "
+                                "}");
 
     m_redCloseButton->setStyleSheet(ss);
     m_yellowMinimizeButton->setStyleSheet(ss);
@@ -522,13 +599,13 @@ void MainWindow::setupTitleBarButtons()
  */
 void MainWindow::setupSignalsSlots()
 {
-    connect(&m_updater, &UpdaterWindow::dontShowUpdateWindowChanged, [=](bool state){m_dontShowUpdateWindow = state;});
+    connect(&m_updater, &UpdaterWindow::dontShowUpdateWindowChanged, [=](bool state) { m_dontShowUpdateWindow = state; });
     // Style Editor Window
-    connect(&m_styleEditorWindow, &StyleEditorWindow::changeFontType, this, [=](FontTypeface fontType){changeEditorFontTypeFromStyleButtons(fontType);});
-    connect(&m_styleEditorWindow, &StyleEditorWindow::changeFontSize, this, [=](FontSizeAction fontSizeAction){changeEditorFontSizeFromStyleButtons(fontSizeAction);});
-    connect(&m_styleEditorWindow, &StyleEditorWindow::changeEditorTextWidth, this, [=](EditorTextWidth editorTextWidth){changeEditorTextWidthFromStyleButtons(editorTextWidth);});
-    connect(&m_styleEditorWindow, &StyleEditorWindow::resetEditorToDefaultSettings, this, [=](){resetEditorToDefaultSettings();});
-    connect(&m_styleEditorWindow, &StyleEditorWindow::changeTheme, this, [=](Theme theme){setTheme(theme);});
+    connect(&m_styleEditorWindow, &StyleEditorWindow::changeFontType, this, [=](FontTypeface fontType) { changeEditorFontTypeFromStyleButtons(fontType); });
+    connect(&m_styleEditorWindow, &StyleEditorWindow::changeFontSize, this, [=](FontSizeAction fontSizeAction) { changeEditorFontSizeFromStyleButtons(fontSizeAction); });
+    connect(&m_styleEditorWindow, &StyleEditorWindow::changeEditorTextWidth, this, [=](EditorTextWidth editorTextWidth) { changeEditorTextWidthFromStyleButtons(editorTextWidth); });
+    connect(&m_styleEditorWindow, &StyleEditorWindow::resetEditorToDefaultSettings, this, [=]() { resetEditorToDefaultSettings(); });
+    connect(&m_styleEditorWindow, &StyleEditorWindow::changeTheme, this, [=](Theme theme) { setTheme(theme); });
     // actions
     // connect(rightToLeftActionion, &QAction::triggered, this, );
     //connect(checkForUpdatesAction, &QAction::triggered, this, );
@@ -544,20 +621,34 @@ void MainWindow::setupSignalsSlots()
     // new note button
     connect(m_newNoteButton, &QPushButton::pressed, this, &MainWindow::onNewNoteButtonPressed);
     connect(m_newNoteButton, &QPushButton::clicked, this, &MainWindow::onNewNoteButtonClicked);
+
+    connect(m_unorderedButton, &QPushButton::pressed, this, &MainWindow::onUnorderedButtonPressed);
+    connect(m_unorderedButton, &QPushButton::clicked, this, &MainWindow::onUnorderedButtonClicked);
+
     // delete note button
     connect(m_trashButton, &QPushButton::pressed, this, &MainWindow::onTrashButtonPressed);
     connect(m_trashButton, &QPushButton::clicked, this, &MainWindow::onTrashButtonClicked);
-    connect(m_noteModel, &NoteModel::rowsRemoved, [this](){m_trashButton->setEnabled(true);});
+    connect(m_noteModel, &NoteModel::rowsRemoved, [this]() { m_trashButton->setEnabled(true); });
+
+    connect(m_embedImageButton, &QPushButton::pressed, this, &MainWindow::onEmbedImageButtonPressed);
+    connect(m_embedImageButton, &QPushButton::clicked, this, &MainWindow::onEmbedImageButtonClicked);
+
     // 3 dots button
     connect(m_dotsButton, &QPushButton::pressed, this, &MainWindow::onDotsButtonPressed);
     connect(m_dotsButton, &QPushButton::clicked, this, &MainWindow::onDotsButtonClicked);
     // Style Editor Button
-    connect(m_styleEditorButton, &QPushButton::pressed, this, &MainWindow::onStyleEditorButtonPressed);
-    connect(m_styleEditorButton, &QPushButton::clicked, this, &MainWindow::onStyleEditorButtonClicked);
+    connect(m_boldButton, &QPushButton::pressed, this, &MainWindow::onStyleEditorButtonPressed);
+    connect(m_boldButton, &QPushButton::clicked, this, &MainWindow::onStyleEditorButtonClicked);
+    connect(m_italicButton, &QPushButton::pressed, this, &MainWindow::onItalicButtonPressed);
+    connect(m_italicButton, &QPushButton::clicked, this, &MainWindow::onItalicButtonClicked);
+    connect(m_underlineButton, &QPushButton::pressed, this, &MainWindow::onUnderlineButtonPressed);
+    connect(m_underlineButton, &QPushButton::clicked, this, &MainWindow::onUnderlineButtonClicked);
+    connect(m_strikeButton, &QPushButton::pressed, this, &MainWindow::onStrikeButtonPressed);
+    connect(m_strikeButton, &QPushButton::clicked, this, &MainWindow::onStrikeButtonClicked);
     // text edit text changed
-    connect(m_textEdit, &QTextEdit::textChanged, this, &MainWindow::onTextEditTextChanged);
+    connect(m_textEdit, &CustomDocument::textChanged, this, &MainWindow::onTextEditTextChanged);
     // textEdit scrollbar triggered
-    connect(m_textEdit->verticalScrollBar(), &QAbstractSlider::actionTriggered, this, [=](){if(m_isFrameRightTopWidgetsVisible) setVisibilityOfFrameRightNonEditor(false);});
+    connect(m_textEdit->verticalScrollBar(), &QAbstractSlider::actionTriggered, this, [=]() {if(m_isFrameRightTopWidgetsVisible) setVisibilityOfFrameRightNonEditor(false); });
     // line edit text changed
     connect(m_searchEdit, &QLineEdit::textChanged, this, &MainWindow::onSearchEditTextChanged);
     // line edit enter key pressed
@@ -565,11 +656,11 @@ void MainWindow::setupSignalsSlots()
     // note pressed
     connect(m_noteView, &NoteView::pressed, this, &MainWindow::onNotePressed);
     // noteView viewport pressed
-    connect(m_noteView, &NoteView::viewportPressed, this, [this](){
-        if(m_isTemp && m_proxyModel->rowCount() > 1){
+    connect(m_noteView, &NoteView::viewportPressed, this, [this]() {
+        if (m_isTemp && m_proxyModel->rowCount() > 1) {
             QModelIndex indexInProxy = m_proxyModel->index(1, 0);
             selectNote(indexInProxy);
-        }else if(m_isTemp && m_proxyModel->rowCount() == 1){
+        } else if (m_isTemp && m_proxyModel->rowCount() == 1) {
             QModelIndex indexInProxy = m_proxyModel->index(0, 0);
             m_editorDateLabel->clear();
             deleteNote(indexInProxy, false);
@@ -579,50 +670,50 @@ void MainWindow::setupSignalsSlots()
     connect(m_noteModel, &NoteModel::rowsAboutToBeMoved, m_noteView, &NoteView::rowsAboutToBeMoved);
     connect(m_noteModel, &NoteModel::rowsMoved, m_noteView, &NoteView::rowsMoved);
     // auto save timer
-    connect(m_autoSaveTimer, &QTimer::timeout, [this](){
+    connect(m_autoSaveTimer, &QTimer::timeout, [this]() {
         m_autoSaveTimer->stop();
         saveNoteToDB(m_currentSelectedNoteProxy);
     });
     // clear button
     connect(m_clearButton, &QToolButton::clicked, this, &MainWindow::onClearButtonClicked);
     // Restore Notes Action
-    connect(m_restoreAction, &QAction::triggered, this, [this](){
+    connect(m_restoreAction, &QAction::triggered, this, [this]() {
         setMainWindowVisibility(isHidden()
-                                || windowState() == Qt::WindowMinimized
-                                || (qApp->applicationState() == Qt::ApplicationInactive));
+            || windowState() == Qt::WindowMinimized
+            || (qApp->applicationState() == Qt::ApplicationInactive));
     });
     // Quit Action
     connect(m_quitAction, &QAction::triggered, this, &MainWindow::QuitApplication);
     // Application state changed
-    connect(qApp, &QApplication::applicationStateChanged, this,[this](){
+    connect(qApp, &QApplication::applicationStateChanged, this, [this]() {
         m_noteView->update(m_noteView->currentIndex());
     });
 
     // MainWindow <-> DBManager
     connect(this, &MainWindow::requestNotesList,
-            m_dbManager,&DBManager::onNotesListRequested, Qt::BlockingQueuedConnection);
+        m_dbManager, &DBManager::onNotesListRequested, Qt::BlockingQueuedConnection);
     connect(this, &MainWindow::requestCreateUpdateNote,
-            m_dbManager, &DBManager::onCreateUpdateRequested, Qt::BlockingQueuedConnection);
+        m_dbManager, &DBManager::onCreateUpdateRequested, Qt::BlockingQueuedConnection);
     connect(this, &MainWindow::requestDeleteNote,
-            m_dbManager, &DBManager::onDeleteNoteRequested);
+        m_dbManager, &DBManager::onDeleteNoteRequested);
     connect(this, &MainWindow::requestRestoreNotes,
-            m_dbManager, &DBManager::onRestoreNotesRequested, Qt::BlockingQueuedConnection);
+        m_dbManager, &DBManager::onRestoreNotesRequested, Qt::BlockingQueuedConnection);
     connect(this, &MainWindow::requestImportNotes,
-            m_dbManager, &DBManager::onImportNotesRequested, Qt::BlockingQueuedConnection);
+        m_dbManager, &DBManager::onImportNotesRequested, Qt::BlockingQueuedConnection);
     connect(this, &MainWindow::requestExportNotes,
-            m_dbManager, &DBManager::onExportNotesRequested, Qt::BlockingQueuedConnection);
+        m_dbManager, &DBManager::onExportNotesRequested, Qt::BlockingQueuedConnection);
     connect(this, &MainWindow::requestMigrateNotes,
-            m_dbManager, &DBManager::onMigrateNotesRequested, Qt::BlockingQueuedConnection);
+        m_dbManager, &DBManager::onMigrateNotesRequested, Qt::BlockingQueuedConnection);
     connect(this, &MainWindow::requestMigrateTrash,
-            m_dbManager, &DBManager::onMigrateTrashRequested, Qt::BlockingQueuedConnection);
+        m_dbManager, &DBManager::onMigrateTrashRequested, Qt::BlockingQueuedConnection);
     connect(this, &MainWindow::requestForceLastRowIndexValue,
-            m_dbManager, &DBManager::onForceLastRowIndexValueRequested, Qt::BlockingQueuedConnection);
+        m_dbManager, &DBManager::onForceLastRowIndexValueRequested, Qt::BlockingQueuedConnection);
 
     connect(m_dbManager, &DBManager::notesReceived, this, &MainWindow::loadNotes);
 
 #ifdef __APPLE__
     // Replace setUseNativeWindowFrame with just the part that handles pushing things up
-    connect(this, &MainWindow::toggleFullScreen, this, [=](bool isFullScreen){adjustUpperWidgets(isFullScreen);});
+    connect(this, &MainWindow::toggleFullScreen, this, [=](bool isFullScreen) { adjustUpperWidgets(isFullScreen); });
 #endif
 }
 
@@ -643,22 +734,23 @@ void MainWindow::setSearchEditStyleSheet(bool isFocused = false)
     QColor textColor = m_currentTheme == Theme::Dark ? m_currentEditorTextColor : QColor(26, 26, 26);
 
     m_searchEdit->setStyleSheet(QStringLiteral("QLineEdit{ "
-                                             "  padding-left: 21px;"
-                                             "  padding-right: 19px;"
-                                             "  border: %2;"
-                                             "  border-radius: 3px;"
-                                             "  background: %1;"
-                                             "  selection-background-color: rgb(61, 155, 218);"
-                                             "  color: %3;"
-                                             "} "
-                                             "QLineEdit:focus { "
-                                             "  border: 2px solid rgb(61, 155, 218);"
-                                             "}"
-                                             "QToolButton { "
-                                             "  border: none; "
-                                             "  padding: 0px;"
-                                             "}").arg(m_currentThemeBackgroundColor.name(),
-                                                      isFocused ? "2px solid rgb(61, 155, 218)" : "1px solid rgb(205, 205, 205)",                                                      textColor.name()));
+                                               "  padding-left: 21px;"
+                                               "  padding-right: 19px;"
+                                               "  border: %2;"
+                                               "  border-radius: 3px;"
+                                               "  background: %1;"
+                                               "  selection-background-color: rgb(61, 155, 218);"
+                                               "  color: %3;"
+                                               "} "
+                                               "QLineEdit:focus { "
+                                               "  border: 2px solid rgb(61, 155, 218);"
+                                               "}"
+                                               "QToolButton { "
+                                               "  border: none; "
+                                               "  padding: 0px;"
+                                               "}")
+                                    .arg(m_currentThemeBackgroundColor.name(),
+                                        isFocused ? "2px solid rgb(61, 155, 218)" : "1px solid rgb(205, 205, 205)", textColor.name()));
 }
 
 /*!
@@ -667,7 +759,7 @@ void MainWindow::setSearchEditStyleSheet(bool isFocused = false)
  */
 void MainWindow::setupSearchEdit()
 {
-//    QLineEdit* searchEdit = m_searchEdit;
+    //    QLineEdit* searchEdit = m_searchEdit;
 
     m_searchEdit->setAttribute(Qt::WA_MacShowFocusRect, 0);
 
@@ -683,7 +775,7 @@ void MainWindow::setupSearchEdit()
     m_clearButton->hide();
 
     // search button
-    QToolButton *searchButton = new QToolButton(m_searchEdit);
+    QToolButton* searchButton = new QToolButton(m_searchEdit);
     QPixmap newPixmap(QStringLiteral(":images/magnifyingGlass.png"));
     searchButton->setIcon(QIcon(newPixmap));
     QSize searchSize(24, 25);
@@ -692,7 +784,7 @@ void MainWindow::setupSearchEdit()
 
     // layout
     QBoxLayout* layout = new QBoxLayout(QBoxLayout::RightToLeft, m_searchEdit);
-    layout->setContentsMargins(0,0,3,0);
+    layout->setContentsMargins(0, 0, 3, 0);
     layout->addWidget(m_clearButton);
     layout->addStretch();
     layout->addWidget(searchButton);
@@ -708,34 +800,34 @@ void MainWindow::setupSearchEdit()
 void MainWindow::setCurrentFontBasedOnTypeface(FontTypeface selectedFontTypeFace)
 {
     m_currentFontTypeface = selectedFontTypeFace;
-    switch(selectedFontTypeFace) {
+    switch (selectedFontTypeFace) {
     case FontTypeface::Mono:
         m_currentFontFamily = m_listOfMonoFonts.at(m_chosenMonoFontIndex);
-        m_textEdit->setLineWrapColumnOrWidth(m_currentCharsLimitPerFont.mono);
+        //        m_textEdit->setLineWrapColumnOrWidth(m_currentCharsLimitPerFont.mono);
         break;
     case FontTypeface::Serif:
         m_currentFontFamily = m_listOfSerifFonts.at(m_chosenSerifFontIndex);
-        m_textEdit->setLineWrapColumnOrWidth(m_currentCharsLimitPerFont.serif);
+        //        m_textEdit->setLineWrapColumnOrWidth(m_currentCharsLimitPerFont.serif);
         break;
     case FontTypeface::SansSerif:
         m_currentFontFamily = m_listOfSansSerifFonts.at(m_chosenSansSerifFontIndex);
-        m_textEdit->setLineWrapColumnOrWidth(m_currentCharsLimitPerFont.sansSerif);
+        //        m_textEdit->setLineWrapColumnOrWidth(m_currentCharsLimitPerFont.sansSerif);
         break;
     }
 
 #ifdef __APPLE__
-        int increaseSize = 2;
+    int increaseSize = 2;
 #else
-        int increaseSize = 1;
+    int increaseSize = 1;
 #endif
 
-        if(m_textEdit->width() < m_smallEditorWidth) {
-            m_currentFontPointSize = m_editorMediumFontSize - 2;
-        } else if(m_textEdit->width() > m_smallEditorWidth && m_textEdit->width() < m_largeEditorWidth) {
-            m_currentFontPointSize = m_editorMediumFontSize;
-        } else if(m_textEdit->width() > m_largeEditorWidth) {
-            m_currentFontPointSize = m_editorMediumFontSize + increaseSize;
-        }
+    if (m_textEdit->width() < m_smallEditorWidth) {
+        m_currentFontPointSize = m_editorMediumFontSize - 2;
+    } else if (m_textEdit->width() > m_smallEditorWidth && m_textEdit->width() < m_largeEditorWidth) {
+        m_currentFontPointSize = m_editorMediumFontSize;
+    } else if (m_textEdit->width() > m_largeEditorWidth) {
+        m_currentFontPointSize = m_editorMediumFontSize + increaseSize;
+    }
 
     m_currentSelectedFont = QFont(m_currentFontFamily, m_currentFontPointSize, QFont::Normal);
     m_textEdit->setFont(m_currentSelectedFont);
@@ -762,7 +854,7 @@ void MainWindow::resetEditorSettings()
     m_currentCharsLimitPerFont.mono = 64;
     m_currentCharsLimitPerFont.serif = 80;
     m_currentCharsLimitPerFont.sansSerif = 80;
-    m_textEdit->setLineWrapMode(QTextEdit::FixedColumnWidth);
+    //    m_textEdit->setLineWrapMode(QTextEdit::FixedColumnWidth);
     m_textEdit->setWordWrapMode(QTextOption::WordWrap);
     m_currentTheme = Theme::Light;
 
@@ -789,12 +881,12 @@ void MainWindow::setupTextEditStyleSheet(int paddingLeft, int paddingRight)
                          "QScrollBar {margin: 0; background: transparent;} "
                          "QScrollBar:hover { background-color: rgb(217, 217, 217);}"
                          "QScrollBar::add-line:vertical { width:0px; height: 0px; subcontrol-position: bottom; subcontrol-origin: margin; }  "
-                         "QScrollBar::sub-line:vertical { width:0px; height: 0px; subcontrol-position: top; subcontrol-origin: margin; }"
-                         ).arg(m_currentEditorBackgroundColor.name());
+                         "QScrollBar::sub-line:vertical { width:0px; height: 0px; subcontrol-position: top; subcontrol-origin: margin; }")
+                     .arg(m_currentEditorBackgroundColor.name());
 #else
     QString ss = QString("QTextEdit {background-color: %1;} "
-                         "QTextEdit{selection-background-color: rgb(63, 99, 139);}"
-                         ).arg(m_currentEditorBackgroundColor.name());
+                         "QTextEdit{selection-background-color: rgb(63, 99, 139);}")
+                     .arg(m_currentEditorBackgroundColor.name());
 #endif
 
     m_textEdit->setStyleSheet(ss);
@@ -807,21 +899,18 @@ void MainWindow::setupTextEditStyleSheet(int paddingLeft, int paddingRight)
  */
 void MainWindow::alignTextEditText()
 {
-    if(m_textEdit->lineWrapMode() == QTextEdit::WidgetWidth){
+    if (m_textEdit->lineWrapMode() == QTextEdit::WidgetWidth) {
         setupTextEditStyleSheet(m_currentMinimumEditorPadding, m_currentMinimumEditorPadding);
         return;
     }
 
     QFontMetricsF fm(m_currentSelectedFont);
     QString limitingStringSample = QString("The quick brown fox jumps over the lazy dog the quick brown fox jumps over the lazy dog the quick brown fox jumps over the lazy dog");
-    limitingStringSample.truncate(m_textEdit->lineWrapColumnOrWidth());
+    //    limitingStringSample.truncate(m_textEdit->lineWrapColumnOrWidth());
     qreal textSamplePixelsWidth = fm.width(limitingStringSample);
     m_currentAdaptableEditorPadding = (m_textEdit->width() - textSamplePixelsWidth) / 2 - 10;
 
-
-    if(m_textEdit->width() - m_currentMinimumEditorPadding*2 > textSamplePixelsWidth &&
-            m_currentAdaptableEditorPadding > 0 &&
-            m_currentAdaptableEditorPadding > m_currentMinimumEditorPadding) {
+    if (m_textEdit->width() - m_currentMinimumEditorPadding * 2 > textSamplePixelsWidth && m_currentAdaptableEditorPadding > 0 && m_currentAdaptableEditorPadding > m_currentMinimumEditorPadding) {
         setupTextEditStyleSheet(m_currentAdaptableEditorPadding, m_currentAdaptableEditorPadding);
     } else {
         setupTextEditStyleSheet(m_currentMinimumEditorPadding, m_currentMinimumEditorPadding);
@@ -841,38 +930,38 @@ void MainWindow::setupTextEdit()
     m_textEdit->installEventFilter(this);
     m_textEdit->verticalScrollBar()->installEventFilter(this);
     m_textEdit->setCursorWidth(2);
-    m_textEdit->setTextColor(QColor(26, 26, 26));
+    //    m_textEdit->setTextColor(QColor(26, 26, 26));
     m_textEdit->setWordWrapMode(QTextOption::WordWrap);
 
 #ifdef __APPLE__
-    if(QFont("Avenir Next").exactMatch()) {
+    if (QFont("Avenir Next").exactMatch()) {
         m_listOfSansSerifFonts.push_front("Avenir Next");
-    } else if(QFont("Avenir").exactMatch()) {
+    } else if (QFont("Avenir").exactMatch()) {
         m_listOfSansSerifFonts.push_front("Avenir");
     }
 
-    if(QFont("SF Pro Text").exactMatch()) {
+    if (QFont("SF Pro Text").exactMatch()) {
         m_listOfSansSerifFonts.push_front("SF Pro Text");
-    } else if(QFont("Helvetica Neue").exactMatch()) {
+    } else if (QFont("Helvetica Neue").exactMatch()) {
         m_listOfSansSerifFonts.push_front("Helvetica Neue");
-    } else if(QFont("Helvetica").exactMatch()) {
+    } else if (QFont("Helvetica").exactMatch()) {
         m_listOfSansSerifFonts.push_front("Helvetica");
     }
 #elif _WIN32
-     if(QFont("Calibri").exactMatch())
-         m_listOfSansSerifFonts.push_front("Calibri");
+    if (QFont("Calibri").exactMatch())
+        m_listOfSansSerifFonts.push_front("Calibri");
 
-     if(QFont("Arial").exactMatch())
-         m_listOfSansSerifFonts.push_front("Arial");
+    if (QFont("Arial").exactMatch())
+        m_listOfSansSerifFonts.push_front("Arial");
 
-     if(QFont("Segoe UI").exactMatch())
-         m_listOfSansSerifFonts.push_front("Segoe UI");
+    if (QFont("Segoe UI").exactMatch())
+        m_listOfSansSerifFonts.push_front("Segoe UI");
 #endif
 
     // This is done because for now where we're only handling plain text,
     // and we don't want people to past rich text and get something wrong.
     // In future versions, where we'll support rich text, we'll need to change that.
-    m_textEdit->setAcceptRichText(false);
+    //    m_textEdit->setAcceptRichText(false);
 }
 
 /*!
@@ -881,23 +970,23 @@ void MainWindow::setupTextEdit()
 void MainWindow::initializeSettingsDatabase()
 {
     // Why are we not updating the app version in Settings?
-    if(m_settingsDatabase->value(QStringLiteral("version"), "NULL") == "NULL")
+    if (m_settingsDatabase->value(QStringLiteral("version"), "NULL") == "NULL")
         m_settingsDatabase->setValue(QStringLiteral("version"), qApp->applicationVersion());
 
-    if(m_settingsDatabase->value(QStringLiteral("dontShowUpdateWindow"), "NULL") == "NULL")
+    if (m_settingsDatabase->value(QStringLiteral("dontShowUpdateWindow"), "NULL") == "NULL")
         m_settingsDatabase->setValue(QStringLiteral("dontShowUpdateWindow"), m_dontShowUpdateWindow);
 
-    if(m_settingsDatabase->value(QStringLiteral("windowGeometry"), "NULL") == "NULL"){
+    if (m_settingsDatabase->value(QStringLiteral("windowGeometry"), "NULL") == "NULL") {
         int initWidth = 870;
         int initHeight = 630;
         QPoint center = qApp->desktop()->geometry().center();
-        QRect rect(center.x() - initWidth/2, center.y() - initHeight/2, initWidth, initHeight);
+        QRect rect(center.x() - initWidth / 2, center.y() - initHeight / 2, initWidth, initHeight);
         setGeometry(rect);
         m_settingsDatabase->setValue(QStringLiteral("windowGeometry"), saveGeometry());
     }
 
-    if(m_settingsDatabase->value(QStringLiteral("splitterSizes"), "NULL") == "NULL"){
-        m_splitter->resize(width()-2*m_layoutMargin, height()-2*m_layoutMargin);
+    if (m_settingsDatabase->value(QStringLiteral("splitterSizes"), "NULL") == "NULL") {
+        m_splitter->resize(width() - 2 * m_layoutMargin, height() - 2 * m_layoutMargin);
         QList<int> sizes = m_splitter->sizes();
         m_noteListWidth = ui->frameLeft->minimumWidth() != 0 ? ui->frameLeft->minimumWidth() : m_noteListWidth;
         sizes[0] = m_noteListWidth;
@@ -914,7 +1003,7 @@ void MainWindow::initializeSettingsDatabase()
 void MainWindow::setupDatabases()
 {
     m_settingsDatabase = new QSettings(QSettings::IniFormat, QSettings::UserScope,
-                                       QStringLiteral("Awesomeness"), QStringLiteral("Settings"), this);
+        QStringLiteral("Awesomeness"), QStringLiteral("Settings"), this);
     m_settingsDatabase->setFallbacksEnabled(false);
     initializeSettingsDatabase();
 
@@ -922,14 +1011,14 @@ void MainWindow::setupDatabases()
     QFileInfo fi(m_settingsDatabase->fileName());
     QDir dir(fi.absolutePath());
     bool folderCreated = dir.mkpath(QStringLiteral("."));
-    if(!folderCreated)
+    if (!folderCreated)
         qFatal("ERROR: Can't create settings folder : %s", dir.absolutePath().toStdString().c_str());
 
     QString noteDBFilePath(dir.path() + QDir::separator() + QStringLiteral("notes.db"));
 
-    if(!QFile::exists(noteDBFilePath)){
+    if (!QFile::exists(noteDBFilePath)) {
         QFile noteDBFile(noteDBFilePath);
-        if(!noteDBFile.open(QIODevice::WriteOnly))
+        if (!noteDBFile.open(QIODevice::WriteOnly))
             qFatal("ERROR : Can't create database file");
 
         noteDBFile.close();
@@ -940,7 +1029,7 @@ void MainWindow::setupDatabases()
     m_dbThread = new QThread;
     m_dbThread->setObjectName(QStringLiteral("dbThread"));
     m_dbManager->moveToThread(m_dbThread);
-    connect(m_dbThread, &QThread::started, [=](){emit requestOpenDBManager(noteDBFilePath, doCreate);});
+    connect(m_dbThread, &QThread::started, [=]() { emit requestOpenDBManager(noteDBFilePath, doCreate); });
     connect(this, &MainWindow::requestOpenDBManager, m_dbManager, &DBManager::onOpenDBManagerRequested);
     connect(m_dbThread, &QThread::finished, m_dbManager, &QObject::deleteLater);
     m_dbThread->start();
@@ -970,41 +1059,41 @@ void MainWindow::restoreStates()
 {
     setUseNativeWindowFrame(m_settingsDatabase->value(QStringLiteral("useNativeWindowFrame"), false).toBool());
 
-    if(m_settingsDatabase->value(QStringLiteral("windowGeometry"), "NULL") != "NULL")
+    if (m_settingsDatabase->value(QStringLiteral("windowGeometry"), "NULL") != "NULL")
         this->restoreGeometry(m_settingsDatabase->value(QStringLiteral("windowGeometry")).toByteArray());
 
-    if(m_settingsDatabase->value(QStringLiteral("editorSettingsWindowGeometry"), "NULL") != "NULL")
+    if (m_settingsDatabase->value(QStringLiteral("editorSettingsWindowGeometry"), "NULL") != "NULL")
         m_styleEditorWindow.restoreGeometry(m_settingsDatabase->value(QStringLiteral("editorSettingsWindowGeometry")).toByteArray());
 
 #if defined(Q_OS_LINUX)
-    /// Set margin to zero if the window is maximized
+        /// Set margin to zero if the window is maximized
 //    if (isMaximized()) {
 //        setMargins(QMargins(0,0,0,0));
 //    }
 #endif
 
-    if(m_settingsDatabase->value(QStringLiteral("dontShowUpdateWindow"), "NULL") != "NULL")
+    if (m_settingsDatabase->value(QStringLiteral("dontShowUpdateWindow"), "NULL") != "NULL")
         m_dontShowUpdateWindow = m_settingsDatabase->value(QStringLiteral("dontShowUpdateWindow")).toBool();
 
     m_splitter->setCollapsible(0, true);
     m_splitter->resize(width() - m_layoutMargin, height() - m_layoutMargin);
-    if(m_settingsDatabase->value(QStringLiteral("splitterSizes"), "NULL") != "NULL")
+    if (m_settingsDatabase->value(QStringLiteral("splitterSizes"), "NULL") != "NULL")
         m_splitter->restoreState(m_settingsDatabase->value(QStringLiteral("splitterSizes")).toByteArray());
     m_noteListWidth = m_splitter->sizes().at(0);
     m_splitter->setCollapsible(0, false);
 
     QString selectedFontTypefaceFromDatabase = m_settingsDatabase->value(QStringLiteral("selectedFontTypeface"), "NULL").toString();
-    if(selectedFontTypefaceFromDatabase != "NULL") {
-        if(selectedFontTypefaceFromDatabase == "Mono") {
+    if (selectedFontTypefaceFromDatabase != "NULL") {
+        if (selectedFontTypefaceFromDatabase == "Mono") {
             m_currentFontTypeface = FontTypeface::Mono;
-        } else if(selectedFontTypefaceFromDatabase == "Serif") {
+        } else if (selectedFontTypefaceFromDatabase == "Serif") {
             m_currentFontTypeface = FontTypeface::Serif;
-        } else if(selectedFontTypefaceFromDatabase == "SansSerif") {
+        } else if (selectedFontTypefaceFromDatabase == "SansSerif") {
             m_currentFontTypeface = FontTypeface::SansSerif;
         }
     }
 
-    if(m_settingsDatabase->value(QStringLiteral("editorMediumFontSize"), "NULL") != "NULL") {
+    if (m_settingsDatabase->value(QStringLiteral("editorMediumFontSize"), "NULL") != "NULL") {
         m_editorMediumFontSize = m_settingsDatabase->value(QStringLiteral("editorMediumFontSize")).toInt();
     } else {
 #ifdef __APPLE__
@@ -1016,53 +1105,53 @@ void MainWindow::restoreStates()
     m_currentFontPointSize = m_editorMediumFontSize;
 
     bool isTextFullWidth = false;
-    if(m_settingsDatabase->value(QStringLiteral("isTextFullWidth"), "NULL") != "NULL") {
-        isTextFullWidth = m_settingsDatabase->value(QStringLiteral("isTextFullWidth")).toBool();
-        if(isTextFullWidth) {
-            m_textEdit->setLineWrapMode(QTextEdit::WidgetWidth);
-        } else {
-            m_textEdit->setLineWrapMode(QTextEdit::FixedColumnWidth);
-        }
-    } else {
-        m_textEdit->setLineWrapMode(QTextEdit::FixedColumnWidth);
-    }
+    //    if(m_settingsDatabase->value(QStringLiteral("isTextFullWidth"), "NULL") != "NULL") {
+    //        isTextFullWidth = m_settingsDatabase->value(QStringLiteral("isTextFullWidth")).toBool();
+    //        if(isTextFullWidth) {
+    //            m_textEdit->setLineWrapMode(QTextEdit::WidgetWidth);
+    //        } else {
+    //            m_textEdit->setLineWrapMode(QTextEdit::FixedColumnWidth);
+    //        }
+    //    } else {
+    //        m_textEdit->setLineWrapMode(QTextEdit::FixedColumnWidth);
+    //    }
 
-    if(m_settingsDatabase->value(QStringLiteral("charsLimitPerFontMono"), "NULL") != "NULL")
+    if (m_settingsDatabase->value(QStringLiteral("charsLimitPerFontMono"), "NULL") != "NULL")
         m_currentCharsLimitPerFont.mono = m_settingsDatabase->value(QStringLiteral("charsLimitPerFontMono")).toInt();
-    if(m_settingsDatabase->value(QStringLiteral("charsLimitPerFontSerif"), "NULL") != "NULL")
+    if (m_settingsDatabase->value(QStringLiteral("charsLimitPerFontSerif"), "NULL") != "NULL")
         m_currentCharsLimitPerFont.serif = m_settingsDatabase->value(QStringLiteral("charsLimitPerFontSerif")).toInt();
-    if(m_settingsDatabase->value(QStringLiteral("charsLimitPerFontSansSerif"), "NULL") != "NULL")
+    if (m_settingsDatabase->value(QStringLiteral("charsLimitPerFontSansSerif"), "NULL") != "NULL")
         m_currentCharsLimitPerFont.sansSerif = m_settingsDatabase->value(QStringLiteral("charsLimitPerFontSansSerif")).toInt();
 
-    if(m_settingsDatabase->value(QStringLiteral("chosenMonoFont"), "NULL") != "NULL") {
+    if (m_settingsDatabase->value(QStringLiteral("chosenMonoFont"), "NULL") != "NULL") {
         QString fontName = m_settingsDatabase->value(QStringLiteral("chosenMonoFont")).toString();
         int fontIndex = m_listOfMonoFonts.indexOf(fontName);
-        if(fontIndex != -1) {
+        if (fontIndex != -1) {
             m_chosenMonoFontIndex = fontIndex;
         }
     }
-    if(m_settingsDatabase->value(QStringLiteral("chosenSerifFont"), "NULL") != "NULL") {
+    if (m_settingsDatabase->value(QStringLiteral("chosenSerifFont"), "NULL") != "NULL") {
         QString fontName = m_settingsDatabase->value(QStringLiteral("chosenSerifFont")).toString();
         int fontIndex = m_listOfSerifFonts.indexOf(fontName);
-        if(fontIndex != -1) {
+        if (fontIndex != -1) {
             m_chosenSerifFontIndex = fontIndex;
         }
     }
-    if(m_settingsDatabase->value(QStringLiteral("chosenSansSerifFont"), "NULL") != "NULL") {
+    if (m_settingsDatabase->value(QStringLiteral("chosenSansSerifFont"), "NULL") != "NULL") {
         QString fontName = m_settingsDatabase->value(QStringLiteral("chosenSansSerifFont")).toString();
         int fontIndex = m_listOfSansSerifFonts.indexOf(fontName);
-        if(fontIndex != -1) {
+        if (fontIndex != -1) {
             m_chosenSansSerifFontIndex = fontIndex;
         }
     }
 
-    if(m_settingsDatabase->value(QStringLiteral("theme"), "NULL") != "NULL") {
+    if (m_settingsDatabase->value(QStringLiteral("theme"), "NULL") != "NULL") {
         QString chosenTheme = m_settingsDatabase->value(QStringLiteral("theme")).toString();
         if (chosenTheme == "Light") {
             m_currentTheme = Theme::Light;
-        } else if(chosenTheme == "Dark") {
+        } else if (chosenTheme == "Dark") {
             m_currentTheme = Theme::Dark;
-        } else if(chosenTheme == "Sepia") {
+        } else if (chosenTheme == "Sepia") {
             m_currentTheme = Theme::Sepia;
         }
     }
@@ -1086,7 +1175,7 @@ void MainWindow::restoreStates()
  */
 QString MainWindow::getFirstLine(const QString& str)
 {
-    if(str.simplified().isEmpty())
+    if (str.simplified().isEmpty())
         return "New Note";
 
     QString text = str.trimmed();
@@ -1118,9 +1207,9 @@ QDateTime MainWindow::getQDateTime(QString date)
 QString MainWindow::getNoteDateEditor(QString dateEdited)
 {
     QDateTime dateTimeEdited(getQDateTime(dateEdited));
-    QLocale usLocale(QLocale(QStringLiteral("en_US")));
+    QLocale usLocale(QLocale(QStringLiteral("zh_CN")));
 
-    return usLocale.toString(dateTimeEdited, QStringLiteral("MMMM d, yyyy, h:mm A"));
+    return usLocale.toString(dateTimeEdited, QStringLiteral("yyyy-MM-dd h:mm"));
 }
 
 /*!
@@ -1149,20 +1238,19 @@ NoteData* MainWindow::generateNote(const int noteID)
  * And restore the scrollBar position if it changed before.
  * \param noteIndex
  */
-void MainWindow::showNoteInEditor(const QModelIndex &noteIndex)
+void MainWindow::showNoteInEditor(const QModelIndex& noteIndex)
 {
     m_textEdit->blockSignals(true);
 
     /// fixing bug #202
-    m_textEdit->setTextBackgroundColor(QColor(255,255,255, 0));
-
+    //    m_textEdit->setTextBackgroundColor(QColor(255,255,255, 0));
 
     QString content = noteIndex.data(NoteModel::NoteContent).toString();
     QDateTime dateTime = noteIndex.data(NoteModel::NoteLastModificationDateTime).toDateTime();
     int scrollbarPos = noteIndex.data(NoteModel::NoteScrollbarPos).toInt();
 
     // set text and date
-    m_textEdit->setText(content);
+    m_textEdit->setHtml(content);
     QString noteDate = dateTime.toString(Qt::ISODate);
     QString noteDateEditor = getNoteDateEditor(noteDate);
     m_editorDateLabel->setText(noteDateEditor);
@@ -1178,7 +1266,8 @@ void MainWindow::showNoteInEditor(const QModelIndex &noteIndex)
  * Either create a new note if the user has no notes in the folder
  * or select the first note from the list
  */
-void MainWindow::createOrSelectFirstNote() {
+void MainWindow::createOrSelectFirstNote()
+{
     createNewNoteIfEmpty();
     selectFirstNote();
 }
@@ -1192,11 +1281,11 @@ void MainWindow::createOrSelectFirstNote() {
  * \param noteList
  * \param noteCounter
  */
-void MainWindow::loadNotes(QList<NoteData *> noteList, int noteCounter)
+void MainWindow::loadNotes(QList<NoteData*> noteList, int noteCounter)
 {
-    if(!noteList.isEmpty()){
+    if (!noteList.isEmpty()) {
         m_noteModel->addListNote(noteList);
-        m_noteModel->sort(0,Qt::AscendingOrder);
+        m_noteModel->sort(0, Qt::AscendingOrder);
     }
 
     m_noteCounter = noteCounter;
@@ -1213,10 +1302,10 @@ void MainWindow::loadNotes(QList<NoteData *> noteList, int noteCounter)
  */
 void MainWindow::saveNoteToDB(const QModelIndex& noteIndex)
 {
-    if(noteIndex.isValid() && m_isContentModified){
+    if (noteIndex.isValid() && m_isContentModified) {
         QModelIndex indexInSrc = m_proxyModel->mapToSource(noteIndex);
         NoteData* note = m_noteModel->getNote(indexInSrc);
-        if(note != Q_NULLPTR)
+        if (note != Q_NULLPTR)
             emit requestCreateUpdateNote(note);
 
         m_isContentModified = false;
@@ -1229,7 +1318,7 @@ void MainWindow::saveNoteToDB(const QModelIndex& noteIndex)
  */
 void MainWindow::removeNoteFromDB(const QModelIndex& noteIndex)
 {
-    if(noteIndex.isValid()){
+    if (noteIndex.isValid()) {
         QModelIndex indexInSrc = m_proxyModel->mapToSource(noteIndex);
         NoteData* note = m_noteModel->getNote(indexInSrc);
         emit requestDeleteNote(note);
@@ -1242,8 +1331,8 @@ void MainWindow::removeNoteFromDB(const QModelIndex& noteIndex)
  */
 void MainWindow::selectFirstNote()
 {
-    if(m_proxyModel->rowCount() > 0){
-        QModelIndex index = m_proxyModel->index(0,0);
+    if (m_proxyModel->rowCount() > 0) {
+        QModelIndex index = m_proxyModel->index(0, 0);
         m_noteView->selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
         m_noteView->setCurrentIndex(index);
 
@@ -1258,7 +1347,7 @@ void MainWindow::selectFirstNote()
  */
 void MainWindow::createNewNoteIfEmpty()
 {
-    if(m_proxyModel->rowCount() == 0)
+    if (m_proxyModel->rowCount() == 0)
         createNewNote();
 }
 
@@ -1268,15 +1357,20 @@ void MainWindow::createNewNoteIfEmpty()
  */
 void MainWindow::setButtonsAndFieldsEnabled(bool doEnable)
 {
-    m_greenMaximizeButton->setEnabled(doEnable);
-    m_redCloseButton->setEnabled(doEnable);
-    m_yellowMinimizeButton->setEnabled(doEnable);
+    //    m_greenMaximizeButton->setEnabled(doEnable);
+    //    m_redCloseButton->setEnabled(doEnable);
+    //    m_yellowMinimizeButton->setEnabled(doEnable);
     m_newNoteButton->setEnabled(doEnable);
     m_trashButton->setEnabled(doEnable);
+    m_unorderedButton->setEnabled(doEnable);
+    m_embedImageButton->setEnabled(doEnable);
     m_searchEdit->setEnabled(doEnable);
     m_textEdit->setEnabled(doEnable);
     m_dotsButton->setEnabled(doEnable);
-    m_styleEditorButton->setEnabled(doEnable);
+    m_boldButton->setEnabled(doEnable);
+    m_italicButton->setEnabled(doEnable);
+    m_underlineButton->setEnabled(doEnable);
+    m_strikeButton->setEnabled(doEnable);
 }
 
 /*!
@@ -1296,20 +1390,33 @@ void MainWindow::onNewNoteButtonClicked()
 {
     m_newNoteButton->setIcon(QIcon(QStringLiteral(":/images/newNote_Regular.png")));
 
-    if(!m_searchEdit->text().isEmpty()){
+    if (!m_searchEdit->text().isEmpty()) {
         clearSearch();
         m_selectedNoteBeforeSearchingInSource = QModelIndex();
     }
 
     // save the data of the previous selected
-    if(m_currentSelectedNoteProxy.isValid()
-            && m_isContentModified){
+    if (m_currentSelectedNoteProxy.isValid()
+        && m_isContentModified) {
 
         saveNoteToDB(m_currentSelectedNoteProxy);
         m_isContentModified = false;
     }
 
     this->createNewNote();
+}
+
+void MainWindow::onUnorderedButtonPressed()
+{
+    m_unorderedButton->setIcon(QIcon(QStringLiteral(":/images/unordered_Pressed.png")));
+}
+
+void MainWindow::onUnorderedButtonClicked()
+{
+    m_unorderedButton->setIcon(QIcon(QStringLiteral(":/images/unordered_Regular.png")));
+    m_unorderedButton->blockSignals(true);
+    makeUnorderedList();
+    m_unorderedButton->blockSignals(false);
 }
 
 /*!
@@ -1332,6 +1439,20 @@ void MainWindow::onTrashButtonClicked()
     m_trashButton->blockSignals(true);
     deleteSelectedNote();
     m_trashButton->blockSignals(false);
+}
+
+void MainWindow::onEmbedImageButtonPressed()
+{
+    m_embedImageButton->setIcon(QIcon(QStringLiteral(":/images/image_Pressed.png")));
+}
+
+void MainWindow::onEmbedImageButtonClicked()
+{
+    m_embedImageButton->setIcon(QIcon(QStringLiteral(":/images/image_Regular.png")));
+
+    m_embedImageButton->blockSignals(true);
+    embedImage();
+    m_embedImageButton->blockSignals(false);
 }
 
 /*!
@@ -1370,42 +1491,42 @@ void MainWindow::onDotsButtonClicked()
 
     // note list visiblity action
     bool isCollapsed = (m_splitter->sizes().at(0) == 0);
-    QString actionLabel = isCollapsed? tr("Show notes list")
-                                     : tr("Hide notes list");
+    QString actionLabel = isCollapsed ? tr("Show notes list")
+                                      : tr("Hide notes list");
 
     QAction* noteListVisbilityAction = viewMenu->addAction(actionLabel);
     noteListVisbilityAction->setShortcut(Qt::CTRL + Qt::Key_J);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
     noteListVisbilityAction->setShortcutVisibleInContextMenu(true);
 #endif
-    if(isCollapsed){
+    if (isCollapsed) {
         connect(noteListVisbilityAction, &QAction::triggered, this, &MainWindow::expandNoteList);
-    }else{
+    } else {
         connect(noteListVisbilityAction, &QAction::triggered, this, &MainWindow::collapseNoteList);
     }
 
     // Enable or Disable markdown
-    QString markDownLabel = is_markdown_enabled? tr("Disable Markdown")
-                                               : tr("Enable Markdown");
+    QString markDownLabel = is_markdown_enabled ? tr("Disable Markdown")
+                                                : tr("Enable Markdown");
 
-    QAction* noteMarkdownVisibiltyAction = viewMenu->addAction(markDownLabel);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
-    noteMarkdownVisibiltyAction->setShortcutVisibleInContextMenu(true);
-#endif
+    //    QAction* noteMarkdownVisibiltyAction = viewMenu->addAction(markDownLabel);
+    //#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+    //    noteMarkdownVisibiltyAction->setShortcutVisibleInContextMenu(true);
+    //#endif
 
-    if(is_markdown_enabled){
-        connect(noteMarkdownVisibiltyAction, &QAction::triggered, this, &MainWindow::disableMarkdownHighlighter);
-    }else{
-        connect(noteMarkdownVisibiltyAction, &QAction::triggered, this, &MainWindow::enableMarkdownHighlighter);
-    }
+    //    if (is_markdown_enabled) {
+    //        connect(noteMarkdownVisibiltyAction, &QAction::triggered, this, &MainWindow::disableMarkdownHighlighter);
+    //    } else {
+    //        connect(noteMarkdownVisibiltyAction, &QAction::triggered, this, &MainWindow::enableMarkdownHighlighter);
+    //    }
 
     // Check for update action
     QAction* checkForUpdatesAction = mainMenu.addAction(tr("Check For Updates"));
-    connect (checkForUpdatesAction, &QAction::triggered, this, &MainWindow::checkForUpdates);
+    connect(checkForUpdatesAction, &QAction::triggered, this, &MainWindow::checkForUpdates);
 
     // Autostart
     QAction* autostartAction = mainMenu.addAction(tr("Start automatically"));
-    connect (autostartAction, &QAction::triggered, this, [&]() {
+    connect(autostartAction, &QAction::triggered, this, [&]() {
         m_autostart.setAutostart(autostartAction->isChecked());
     });
     autostartAction->setCheckable(true);
@@ -1413,8 +1534,7 @@ void MainWindow::onDotsButtonClicked()
 
     // About Notes
     QAction* aboutAction = mainMenu.addAction(tr("About Notes"));
-    connect (aboutAction, &QAction::triggered, this, [&]() {
-
+    connect(aboutAction, &QAction::triggered, this, [&]() {
         m_aboutWindow.show();
     });
 
@@ -1422,28 +1542,28 @@ void MainWindow::onDotsButtonClicked()
 
     // Close the app
     QAction* quitAppAction = mainMenu.addAction(tr("Quit"));
-    connect (quitAppAction, &QAction::triggered, this, &MainWindow::QuitApplication);
+    connect(quitAppAction, &QAction::triggered, this, &MainWindow::QuitApplication);
 
     // Export notes action
-    QAction* exportNotesFileAction = importExportNotesMenu->addAction (tr("Export"));
+    QAction* exportNotesFileAction = importExportNotesMenu->addAction(tr("Export"));
     exportNotesFileAction->setToolTip(tr("Save notes to a file"));
-    connect (exportNotesFileAction, &QAction::triggered,
-             this, &MainWindow::exportNotesFile);
+    connect(exportNotesFileAction, &QAction::triggered,
+        this, &MainWindow::exportNotesFile);
 
     // Import notes action
-    QAction* importNotesFileAction = importExportNotesMenu->addAction (tr("Import"));
+    QAction* importNotesFileAction = importExportNotesMenu->addAction(tr("Import"));
     importNotesFileAction->setToolTip(tr("Add notes from a file"));
-    connect (importNotesFileAction, &QAction::triggered,
-             this, &MainWindow::importNotesFile);
+    connect(importNotesFileAction, &QAction::triggered,
+        this, &MainWindow::importNotesFile);
 
     // Restore notes action
-    QAction* restoreNotesFileAction = importExportNotesMenu->addAction (tr("Restore"));
+    QAction* restoreNotesFileAction = importExportNotesMenu->addAction(tr("Restore"));
     restoreNotesFileAction->setToolTip(tr("Replace all notes with notes from a file"));
-    connect (restoreNotesFileAction, &QAction::triggered,
-             this, &MainWindow::restoreNotesFile);
+    connect(restoreNotesFileAction, &QAction::triggered,
+        this, &MainWindow::restoreNotesFile);
 
     // Export disabled if no notes exist
-    if(m_noteModel->rowCount() < 1){
+    if (m_noteModel->rowCount() < 1) {
         exportNotesFileAction->setDisabled(true);
     }
 
@@ -1456,14 +1576,14 @@ void MainWindow::onDotsButtonClicked()
     connect(stayOnTopAction, &QAction::triggered, this, &MainWindow::toggleStayOnTop);
 #endif
 
-#ifndef __APPLE__
-    // Use native frame action
-    QAction* useNativeFrameAction = viewMenu->addAction(tr("Use native window frame"));
-    useNativeFrameAction->setToolTip(tr("Use the window frame provided by the window manager"));
-    useNativeFrameAction->setCheckable(true);
-    useNativeFrameAction->setChecked(m_useNativeWindowFrame);
-    connect(useNativeFrameAction, &QAction::triggered, this, &MainWindow::askBeforeSettingNativeWindowFrame);
-#endif
+    //#ifndef __APPLE__
+    //    // Use native frame action
+    //    QAction* useNativeFrameAction = viewMenu->addAction(tr("Use native window frame"));
+    //    useNativeFrameAction->setToolTip(tr("Use the window frame provided by the window manager"));
+    //    useNativeFrameAction->setCheckable(true);
+    //    useNativeFrameAction->setChecked(m_useNativeWindowFrame);
+    //    connect(useNativeFrameAction, &QAction::triggered, this, &MainWindow::askBeforeSettingNativeWindowFrame);
+    //#endif
 
     mainMenu.exec(m_dotsButton->mapToGlobal(QPoint(0, m_dotsButton->height())));
 }
@@ -1475,11 +1595,11 @@ void MainWindow::onDotsButtonClicked()
 void MainWindow::onStyleEditorButtonPressed()
 {
     QString ss = QStringLiteral("QPushButton { "
-                 "  border: none; "
-                 "  padding: 0px; "
-                 "  color: rgb(39, 85, 125);"
-                 "}");
-    m_styleEditorButton->setStyleSheet(ss);
+                                "  border: none; "
+                                "  padding: 0px; "
+                                "  color: rgb(39, 85, 125);"
+                                "}");
+    m_boldButton->setStyleSheet(ss);
 }
 
 /*!
@@ -1489,22 +1609,85 @@ void MainWindow::onStyleEditorButtonPressed()
 void MainWindow::onStyleEditorButtonClicked()
 {
     QString ss = QStringLiteral("QPushButton { "
-                 "  border: none; "
-                 "  padding: 0px; "
-                 "  color: rgb(68, 138, 201);"
-                 "}");
-    m_styleEditorButton->setStyleSheet(ss);
+                                "  border: none; "
+                                "  padding: 0px; "
+                                "  color: rgb(68, 138, 201);"
+                                "}");
+    m_boldButton->setStyleSheet(ss);
+    makeBold();
 
+    //    if(m_settingsDatabase->value(QStringLiteral("editorSettingsWindowGeometry"), "NULL") == "NULL")
+    //        m_styleEditorWindow.move(m_newNoteButton->mapToGlobal(QPoint(-m_styleEditorWindow.width()-m_newNoteButton->width(),m_newNoteButton->height())));
 
-    if(m_settingsDatabase->value(QStringLiteral("editorSettingsWindowGeometry"), "NULL") == "NULL")
-        m_styleEditorWindow.move(m_newNoteButton->mapToGlobal(QPoint(-m_styleEditorWindow.width()-m_newNoteButton->width(),m_newNoteButton->height())));
+    //    if(m_styleEditorWindow.isVisible()) {
+    //        m_styleEditorWindow.hide();
+    //    } else {
+    //        m_styleEditorWindow.show();
+    //        m_styleEditorWindow.setFocus();
+    //    }
+}
 
-    if(m_styleEditorWindow.isVisible()) {
-        m_styleEditorWindow.hide();
-    } else {
-        m_styleEditorWindow.show();
-        m_styleEditorWindow.setFocus();
-    }
+void MainWindow::onItalicButtonPressed()
+{
+    QString ss = QStringLiteral("QPushButton { "
+                                "  border: none; "
+                                "  padding: 0px; "
+                                "  color: rgb(39, 85, 125);"
+                                "}");
+    m_italicButton->setStyleSheet(ss);
+}
+
+void MainWindow::onItalicButtonClicked()
+{
+    QString ss = QStringLiteral("QPushButton { "
+                                "  border: none; "
+                                "  padding: 0px; "
+                                "  color: rgb(68, 138, 201);"
+                                "}");
+    m_italicButton->setStyleSheet(ss);
+    makeItalic();
+}
+
+void MainWindow::onUnderlineButtonPressed()
+{
+    QString ss = QStringLiteral("QPushButton { "
+                                "  border: none; "
+                                "  padding: 0px; "
+                                "  color: rgb(39, 85, 125);"
+                                "}");
+    m_underlineButton->setStyleSheet(ss);
+}
+
+void MainWindow::onUnderlineButtonClicked()
+{
+    QString ss = QStringLiteral("QPushButton { "
+                                "  border: none; "
+                                "  padding: 0px; "
+                                "  color: rgb(68, 138, 201);"
+                                "}");
+    m_underlineButton->setStyleSheet(ss);
+    makeUnderlined();
+}
+
+void MainWindow::onStrikeButtonPressed()
+{
+    QString ss = QStringLiteral("QPushButton { "
+                                "  border: none; "
+                                "  padding: 0px; "
+                                "  color: rgb(39, 85, 125);"
+                                "}");
+    m_strikeButton->setStyleSheet(ss);
+}
+
+void MainWindow::onStrikeButtonClicked()
+{
+    QString ss = QStringLiteral("QPushButton { "
+                                "  border: none; "
+                                "  padding: 0px; "
+                                "  color: rgb(68, 138, 201);"
+                                "}");
+    m_strikeButton->setStyleSheet(ss);
+    makeStriked();
 }
 
 /*!
@@ -1513,19 +1696,18 @@ void MainWindow::onStyleEditorButtonClicked()
  */
 void MainWindow::changeEditorFontTypeFromStyleButtons(FontTypeface fontTypeface)
 {
-    if(m_currentFontTypeface == fontTypeface) {
-        switch(fontTypeface) {
+    if (m_currentFontTypeface == fontTypeface) {
+        switch (fontTypeface) {
         case FontTypeface::Mono:
-            m_chosenMonoFontIndex = m_chosenMonoFontIndex < m_listOfMonoFonts.length()-1 ? m_chosenMonoFontIndex + 1 : 0;
+            m_chosenMonoFontIndex = m_chosenMonoFontIndex < m_listOfMonoFonts.length() - 1 ? m_chosenMonoFontIndex + 1 : 0;
             break;
         case FontTypeface::Serif:
-            m_chosenSerifFontIndex = m_chosenSerifFontIndex < m_listOfSerifFonts.length()-1 ? m_chosenSerifFontIndex + 1 : 0;
+            m_chosenSerifFontIndex = m_chosenSerifFontIndex < m_listOfSerifFonts.length() - 1 ? m_chosenSerifFontIndex + 1 : 0;
             break;
         case FontTypeface::SansSerif:
-            m_chosenSansSerifFontIndex = m_chosenSansSerifFontIndex < m_listOfSansSerifFonts.length()-1 ? m_chosenSansSerifFontIndex + 1 : 0;
+            m_chosenSansSerifFontIndex = m_chosenSansSerifFontIndex < m_listOfSansSerifFonts.length() - 1 ? m_chosenSansSerifFontIndex + 1 : 0;
             break;
         }
-
     }
 
     setCurrentFontBasedOnTypeface(fontTypeface);
@@ -1540,7 +1722,7 @@ void MainWindow::changeEditorFontTypeFromStyleButtons(FontTypeface fontTypeface)
  */
 void MainWindow::changeEditorFontSizeFromStyleButtons(FontSizeAction fontSizeAction)
 {
-    switch(fontSizeAction) {
+    switch (fontSizeAction) {
     case FontSizeAction::Increase:
         m_editorMediumFontSize += 1;
         setCurrentFontBasedOnTypeface(m_currentFontTypeface);
@@ -1559,16 +1741,16 @@ void MainWindow::changeEditorFontSizeFromStyleButtons(FontSizeAction fontSizeAct
  */
 void MainWindow::changeEditorTextWidthFromStyleButtons(EditorTextWidth editorTextWidth)
 {
-    switch(editorTextWidth) {
+    switch (editorTextWidth) {
     case EditorTextWidth::FullWidth:
-        if(m_textEdit->lineWrapMode() != QTextEdit::WidgetWidth)
-            m_textEdit->setLineWrapMode(QTextEdit::WidgetWidth);
-        else
-            m_textEdit->setLineWrapMode(QTextEdit::FixedColumnWidth);
+        //        if(m_textEdit->lineWrapMode() != QTextEdit::WidgetWidth)
+        //            m_textEdit->setLineWrapMode(QTextEdit::WidgetWidth);
+        //        else
+        //            m_textEdit->setLineWrapMode(QTextEdit::FixedColumnWidth);
         break;
     case EditorTextWidth::Increase:
-        m_textEdit->setLineWrapMode(QTextEdit::FixedColumnWidth);
-        switch(m_currentFontTypeface){
+        //        m_textEdit->setLineWrapMode(QTextEdit::FixedColumnWidth);
+        switch (m_currentFontTypeface) {
         case FontTypeface::Mono:
             m_currentCharsLimitPerFont.mono = m_currentCharsLimitPerFont.mono + 1;
             break;
@@ -1581,8 +1763,8 @@ void MainWindow::changeEditorTextWidthFromStyleButtons(EditorTextWidth editorTex
         }
         break;
     case EditorTextWidth::Decrease:
-        m_textEdit->setLineWrapMode(QTextEdit::FixedColumnWidth);
-        switch(m_currentFontTypeface){
+        //        m_textEdit->setLineWrapMode(QTextEdit::FixedColumnWidth);
+        switch (m_currentFontTypeface) {
         case FontTypeface::Mono:
             m_currentCharsLimitPerFont.mono -= 1;
             break;
@@ -1615,41 +1797,38 @@ void MainWindow::resetEditorToDefaultSettings()
 void MainWindow::setTheme(Theme theme)
 {
     m_currentTheme = theme;
-    switch(theme) {
-    case Theme::Light:
-    {
+    switch (theme) {
+    case Theme::Light: {
         m_currentThemeBackgroundColor = QColor(247, 247, 247);
         m_currentEditorTextColor = QColor(26, 26, 26);
         m_currentEditorBackgroundColor = m_currentThemeBackgroundColor;
         m_currentRightFrameColor = m_currentThemeBackgroundColor;
         this->setStyleSheet(QStringLiteral("QMainWindow { background-color: rgb(247, 247, 247); }"));
-        m_textEdit->setTextColor(m_currentEditorTextColor);
+        //        m_textEdit->setTextColor(m_currentEditorTextColor);
         m_noteView->setTheme(NoteView::Theme::Light);
         m_styleEditorWindow.setTheme(Theme::Light, m_currentThemeBackgroundColor, m_currentEditorTextColor);
         m_aboutWindow.setTheme(m_currentThemeBackgroundColor, m_currentEditorTextColor);
         break;
     }
-    case Theme::Dark:
-    {
+    case Theme::Dark: {
         m_currentThemeBackgroundColor = QColor(26, 26, 26);
         m_currentEditorTextColor = QColor(204, 204, 204);
         m_currentEditorBackgroundColor = m_currentThemeBackgroundColor;
         m_currentRightFrameColor = m_currentThemeBackgroundColor;
         this->setStyleSheet(QStringLiteral("QMainWindow { background-color: rgb(26, 26, 26); }"));
-        m_textEdit->setTextColor(m_currentEditorTextColor);
+        //        m_textEdit->setTextColor(m_currentEditorTextColor);
         m_noteView->setTheme(NoteView::Theme::Dark);
         m_styleEditorWindow.setTheme(Theme::Dark, m_currentThemeBackgroundColor, m_currentEditorTextColor);
         m_aboutWindow.setTheme(m_currentThemeBackgroundColor, m_currentEditorTextColor);
         break;
     }
-    case Theme::Sepia:
-    {
+    case Theme::Sepia: {
         m_currentThemeBackgroundColor = QColor(251, 240, 217);
         m_currentEditorTextColor = QColor(95, 74, 50);
         m_currentEditorBackgroundColor = m_currentThemeBackgroundColor;
         m_currentRightFrameColor = m_currentThemeBackgroundColor;
         this->setStyleSheet(QStringLiteral("QMainWindow { background-color: rgb(251, 240, 217); }"));
-        m_textEdit->setTextColor(m_currentEditorTextColor);
+        //        m_textEdit->setTextColor(m_currentEditorTextColor);
         m_noteView->setTheme(NoteView::Theme::Sepia);
         m_styleEditorWindow.setTheme(Theme::Sepia, m_currentThemeBackgroundColor, QColor(26, 26, 26));
         m_aboutWindow.setTheme(m_currentThemeBackgroundColor, QColor(26, 26, 26));
@@ -1677,7 +1856,7 @@ void MainWindow::setTheme(Theme theme)
  */
 void MainWindow::onNotePressed(const QModelIndex& index)
 {
-    if(sender() != Q_NULLPTR){
+    if (sender() != Q_NULLPTR) {
         QModelIndex indexInProxy = m_proxyModel->index(index.row(), 0);
         selectNote(indexInProxy);
         m_noteView->setCurrentRowActive(false);
@@ -1692,16 +1871,16 @@ void MainWindow::onNotePressed(const QModelIndex& index)
  */
 void MainWindow::onTextEditTextChanged()
 {
-    if(m_currentSelectedNoteProxy.isValid()){
+    if (m_currentSelectedNoteProxy.isValid()) {
         m_textEdit->blockSignals(true);
         QString content = m_currentSelectedNoteProxy.data(NoteModel::NoteContent).toString();
-        if(m_textEdit->toPlainText() != content){
+        if (m_textEdit->toHtml() != content) {
 
             // move note to the top of the list
             QModelIndex sourceIndex = m_proxyModel->mapToSource(m_currentSelectedNoteProxy);
-            if(m_currentSelectedNoteProxy.row() != 0){
+            if (m_currentSelectedNoteProxy.row() != 0) {
                 moveNoteToTop();
-            }else if(!m_searchEdit->text().isEmpty() && sourceIndex.row() != 0){
+            } else if (!m_searchEdit->text().isEmpty() && sourceIndex.row() != 0) {
                 m_noteView->setAnimationEnabled(false);
                 moveNoteToTop();
                 m_noteView->setAnimationEnabled(true);
@@ -1715,7 +1894,7 @@ void MainWindow::onTextEditTextChanged()
 
             // update model
             QMap<int, QVariant> dataValue;
-            dataValue[NoteModel::NoteContent] = QVariant::fromValue(m_textEdit->toPlainText());
+            dataValue[NoteModel::NoteContent] = QVariant::fromValue(m_textEdit->toHtml());
             dataValue[NoteModel::NoteFullTitle] = QVariant::fromValue(firstline);
             dataValue[NoteModel::NoteLastModificationDateTime] = QVariant::fromValue(dateTime);
 
@@ -1732,7 +1911,7 @@ void MainWindow::onTextEditTextChanged()
         m_textEdit->blockSignals(false);
 
         m_isTemp = false;
-    }else{
+    } else {
         qDebug() << "MainWindow::onTextEditTextChanged() : m_currentSelectedNoteProxy is not valid";
     }
 }
@@ -1752,9 +1931,9 @@ void MainWindow::onSearchEditTextChanged(const QString& keyword)
     m_textEdit->clearFocus();
     m_searchQueue.enqueue(keyword);
 
-    if(!m_isOperationRunning){
+    if (!m_isOperationRunning) {
         m_isOperationRunning = true;
-        if(m_isTemp){
+        if (m_isTemp) {
             m_isTemp = false;
             --m_noteCounter;
             // prevent the line edit from emitting signal
@@ -1765,20 +1944,20 @@ void MainWindow::onSearchEditTextChanged(const QString& keyword)
             m_noteModel->removeNote(index);
             m_searchEdit->blockSignals(false);
 
-            if(m_noteModel->rowCount() > 0){
+            if (m_noteModel->rowCount() > 0) {
                 m_selectedNoteBeforeSearchingInSource = m_noteModel->index(0);
-            }else{
+            } else {
                 m_selectedNoteBeforeSearchingInSource = QModelIndex();
             }
 
-        }else if(!m_selectedNoteBeforeSearchingInSource.isValid()
-                 && m_currentSelectedNoteProxy.isValid()){
+        } else if (!m_selectedNoteBeforeSearchingInSource.isValid()
+            && m_currentSelectedNoteProxy.isValid()) {
 
             m_selectedNoteBeforeSearchingInSource = m_proxyModel->mapToSource(m_currentSelectedNoteProxy);
         }
 
-        if(m_currentSelectedNoteProxy.isValid()
-                && m_isContentModified){
+        if (m_currentSelectedNoteProxy.isValid()
+            && m_isContentModified) {
 
             saveNoteToDB(m_currentSelectedNoteProxy);
         }
@@ -1786,16 +1965,16 @@ void MainWindow::onSearchEditTextChanged(const QString& keyword)
         // disable animation while searching
         m_noteView->setAnimationEnabled(false);
 
-        while(!m_searchQueue.isEmpty()){
+        while (!m_searchQueue.isEmpty()) {
             qApp->processEvents();
             QString str = m_searchQueue.dequeue();
-            if(str.isEmpty()){
+            if (str.isEmpty()) {
                 m_noteView->setFocusPolicy(Qt::StrongFocus);
                 clearSearch();
                 QModelIndex indexInProxy = m_proxyModel->mapFromSource(m_selectedNoteBeforeSearchingInSource);
                 selectNote(indexInProxy);
                 m_selectedNoteBeforeSearchingInSource = QModelIndex();
-            }else{
+            } else {
                 m_noteView->setFocusPolicy(Qt::NoFocus);
                 findNotesContain(str);
             }
@@ -1815,18 +1994,18 @@ void MainWindow::onSearchEditTextChanged(const QString& keyword)
  */
 void MainWindow::onClearButtonClicked()
 {
-    if(!m_isOperationRunning){
+    if (!m_isOperationRunning) {
 
         clearSearch();
 
-        if(m_noteModel->rowCount() > 0){
+        if (m_noteModel->rowCount() > 0) {
             QModelIndex indexInProxy = m_proxyModel->mapFromSource(m_selectedNoteBeforeSearchingInSource);
             int row = m_selectedNoteBeforeSearchingInSource.row();
-            if(row == m_noteModel->rowCount())
-                indexInProxy = m_proxyModel->index(m_proxyModel->rowCount()-1,0);
+            if (row == m_noteModel->rowCount())
+                indexInProxy = m_proxyModel->index(m_proxyModel->rowCount() - 1, 0);
 
             selectNote(indexInProxy);
-        }else{
+        } else {
             m_currentSelectedNoteProxy = QModelIndex();
         }
 
@@ -1842,7 +2021,7 @@ void MainWindow::onClearButtonClicked()
  */
 void MainWindow::createNewNote()
 {
-    if(!m_isOperationRunning){
+    if (!m_isOperationRunning) {
         m_isOperationRunning = true;
 
         m_noteView->scrollToTop();
@@ -1853,7 +2032,7 @@ void MainWindow::createNewNote()
         m_textEdit->setFocus();
         m_textEdit->blockSignals(false);
 
-        if(!m_isTemp){
+        if (!m_isTemp) {
             ++m_noteCounter;
             NoteData* tmpNote = generateNote(m_noteCounter);
             m_isTemp = true;
@@ -1869,9 +2048,9 @@ void MainWindow::createNewNote()
             // update the current selected index
             m_currentSelectedNoteProxy = m_proxyModel->mapFromSource(indexSrc);
 
-        }else{
+        } else {
             int row = m_currentSelectedNoteProxy.row();
-            m_noteView->animateAddedRow(QModelIndex(),row, row);
+            m_noteView->animateAddedRow(QModelIndex(), row, row);
         }
 
         m_noteView->setCurrentIndex(m_currentSelectedNoteProxy);
@@ -1887,22 +2066,22 @@ void MainWindow::createNewNote()
  * \param isFromUser
  * true if the user clicked on trash button
  */
-void MainWindow::deleteNote(const QModelIndex &noteIndex, bool isFromUser)
+void MainWindow::deleteNote(const QModelIndex& noteIndex, bool isFromUser)
 {
-    if(noteIndex.isValid()){
+    if (noteIndex.isValid()) {
         // delete from model
         QModelIndex indexToBeRemoved = m_proxyModel->mapToSource(m_currentSelectedNoteProxy);
         NoteData* noteTobeRemoved = m_noteModel->removeNote(indexToBeRemoved);
 
-        if(m_isTemp){
+        if (m_isTemp) {
             m_isTemp = false;
             --m_noteCounter;
-        }else{
+        } else {
             noteTobeRemoved->setDeletionDateTime(QDateTime::currentDateTime());
             emit requestDeleteNote(noteTobeRemoved);
         }
 
-        if(isFromUser){
+        if (isFromUser) {
             // clear text edit and time date label
             m_editorDateLabel->clear();
             m_textEdit->blockSignals(true);
@@ -1910,14 +2089,14 @@ void MainWindow::deleteNote(const QModelIndex &noteIndex, bool isFromUser)
             m_textEdit->clearFocus();
             m_textEdit->blockSignals(false);
 
-            if(m_noteModel->rowCount() > 0){
+            if (m_noteModel->rowCount() > 0) {
                 QModelIndex index = m_noteView->currentIndex();
                 m_currentSelectedNoteProxy = index;
-            }else{
+            } else {
                 m_currentSelectedNoteProxy = QModelIndex();
             }
         }
-    }else{
+    } else {
         qDebug() << "MainWindow::deleteNote noteIndex is not valid";
     }
 
@@ -1930,16 +2109,16 @@ void MainWindow::deleteNote(const QModelIndex &noteIndex, bool isFromUser)
  */
 void MainWindow::deleteSelectedNote()
 {
-    if(!m_isOperationRunning){
+    if (!m_isOperationRunning) {
         m_isOperationRunning = true;
-        if(m_currentSelectedNoteProxy.isValid()){
+        if (m_currentSelectedNoteProxy.isValid()) {
 
             // update the index of the selected note before searching
-            if(!m_searchEdit->text().isEmpty()){
+            if (!m_searchEdit->text().isEmpty()) {
                 QModelIndex currentIndexInSource = m_proxyModel->mapToSource(m_currentSelectedNoteProxy);
                 int beforeSearchSelectedRow = m_selectedNoteBeforeSearchingInSource.row();
-                if(currentIndexInSource.row() < beforeSearchSelectedRow){
-                    m_selectedNoteBeforeSearchingInSource = m_noteModel->index(beforeSearchSelectedRow-1);
+                if (currentIndexInSource.row() < beforeSearchSelectedRow) {
+                    m_selectedNoteBeforeSearchingInSource = m_noteModel->index(beforeSearchSelectedRow - 1);
                 }
             }
 
@@ -1956,7 +2135,7 @@ void MainWindow::deleteSelectedNote()
  */
 void MainWindow::setFocusOnText()
 {
-    if(m_currentSelectedNoteProxy.isValid() && !m_textEdit->hasFocus()) {
+    if (m_currentSelectedNoteProxy.isValid() && !m_textEdit->hasFocus()) {
         m_noteView->setCurrentRowActive(true);
         m_textEdit->setFocus();
     }
@@ -1968,7 +2147,7 @@ void MainWindow::setFocusOnText()
  */
 void MainWindow::setFocusOnCurrentNote()
 {
-    if(m_currentSelectedNoteProxy.isValid()) {
+    if (m_currentSelectedNoteProxy.isValid()) {
         m_noteView->setCurrentRowActive(true);
         m_noteView->setFocus();
     }
@@ -1980,10 +2159,10 @@ void MainWindow::setFocusOnCurrentNote()
  */
 void MainWindow::selectNoteUp()
 {
-    if(m_currentSelectedNoteProxy.isValid()){
+    if (m_currentSelectedNoteProxy.isValid()) {
         int currentRow = m_noteView->currentIndex().row();
         QModelIndex aboveIndex = m_noteView->model()->index(currentRow - 1, 0);
-        if(aboveIndex.isValid()){
+        if (aboveIndex.isValid()) {
             m_noteView->setCurrentIndex(aboveIndex);
             m_noteView->setCurrentRowActive(false);
             m_currentSelectedNoteProxy = aboveIndex;
@@ -2003,15 +2182,15 @@ void MainWindow::selectNoteUp()
  */
 void MainWindow::selectNoteDown()
 {
-    if(m_currentSelectedNoteProxy.isValid()){
-        if(m_isTemp){
+    if (m_currentSelectedNoteProxy.isValid()) {
+        if (m_isTemp) {
             deleteNote(m_currentSelectedNoteProxy, false);
             m_noteView->setCurrentIndex(m_currentSelectedNoteProxy);
             showNoteInEditor(m_currentSelectedNoteProxy);
-        }else{
+        } else {
             int currentRow = m_noteView->currentIndex().row();
             QModelIndex belowIndex = m_noteView->model()->index(currentRow + 1, 0);
-            if(belowIndex.isValid()){
+            if (belowIndex.isValid()) {
                 m_noteView->setCurrentIndex(belowIndex);
                 m_noteView->setCurrentRowActive(false);
                 m_currentSelectedNoteProxy = belowIndex;
@@ -2034,23 +2213,23 @@ void MainWindow::selectNoteDown()
 void MainWindow::fullscreenWindow()
 {
 #if defined(Q_OS_LINUX)
-    if(isFullScreen()){
-        if(!isMaximized()) {
+    if (isFullScreen()) {
+        if (!isMaximized()) {
             m_noteListWidth = m_splitter->sizes().at(0) != 0 ? m_splitter->sizes().at(0) : m_noteListWidth;
-//            QMargins margins(m_layoutMargin,m_layoutMargin,m_layoutMargin,m_layoutMargin);
-//            setMargins(margins);
+            //            QMargins margins(m_layoutMargin,m_layoutMargin,m_layoutMargin,m_layoutMargin);
+            //            setMargins(margins);
         }
 
         setWindowState(windowState() & ~Qt::WindowFullScreen);
-    }else{
+    } else {
         setWindowState(windowState() | Qt::WindowFullScreen);
-//        setMargins(QMargins(0,0,0,0));
+        //        setMargins(QMargins(0,0,0,0));
     }
 
 #elif _WIN32
-    if(isFullScreen()){
+    if (isFullScreen()) {
         showNormal();
-    }else{
+    } else {
         showFullScreen();
     }
 #endif
@@ -2063,29 +2242,29 @@ void MainWindow::fullscreenWindow()
 void MainWindow::maximizeWindow()
 {
 #if defined(Q_OS_LINUX)
-    if(isMaximized()){
-        if(!isFullScreen()){
+    if (isMaximized()) {
+        if (!isFullScreen()) {
             m_noteListWidth = m_splitter->sizes().at(0) != 0 ? m_splitter->sizes().at(0) : m_noteListWidth;
-            QMargins margins(m_layoutMargin,m_layoutMargin,m_layoutMargin,m_layoutMargin);
+            QMargins margins(m_layoutMargin, m_layoutMargin, m_layoutMargin, m_layoutMargin);
 
             setMargins(margins);
             setWindowState(windowState() & ~Qt::WindowMaximized);
-        }else{
+        } else {
             setWindowState(windowState() & ~Qt::WindowFullScreen);
         }
 
-    }else{
+    } else {
         setWindowState(windowState() | Qt::WindowMaximized);
-//        setMargins(QMargins(0,0,0,0));
+        //        setMargins(QMargins(0,0,0,0));
     }
 #elif _WIN32
-    if(isMaximized()){
+    if (isMaximized()) {
         setWindowState(windowState() & ~Qt::WindowMaximized);
         setWindowState(windowState() & ~Qt::WindowFullScreen);
-    }else if(isFullScreen()){
+    } else if (isFullScreen()) {
         setWindowState((windowState() | Qt::WindowMaximized) & ~Qt::WindowFullScreen);
         setGeometry(qApp->primaryScreen()->availableGeometry());
-    }else{
+    } else {
         setWindowState(windowState() | Qt::WindowMaximized);
         setGeometry(qApp->primaryScreen()->availableGeometry());
     }
@@ -2125,7 +2304,7 @@ void MainWindow::QuitApplication()
  */
 void MainWindow::checkForUpdates(const bool clicked)
 {
-    Q_UNUSED (clicked)
+    Q_UNUSED(clicked)
     m_updater.checkForUpdates(true);
 }
 
@@ -2139,7 +2318,7 @@ void MainWindow::checkForUpdates(const bool clicked)
  */
 void MainWindow::importNotesFile(const bool clicked)
 {
-    Q_UNUSED (clicked)
+    Q_UNUSED(clicked)
     executeImport(false);
 }
 
@@ -2153,7 +2332,7 @@ void MainWindow::importNotesFile(const bool clicked)
  */
 void MainWindow::restoreNotesFile(const bool clicked)
 {
-    Q_UNUSED (clicked)
+    Q_UNUSED(clicked)
 
     if (m_noteModel->rowCount() > 0) {
         QMessageBox msgBox;
@@ -2161,7 +2340,7 @@ void MainWindow::restoreNotesFile(const bool clicked)
         msgBox.setInformativeText(tr("Would you like to continue?"));
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msgBox.setDefaultButton(QMessageBox::No);
-        if  (msgBox.exec() != QMessageBox::Yes) {
+        if (msgBox.exec() != QMessageBox::Yes) {
             return;
         }
     }
@@ -2177,8 +2356,8 @@ void MainWindow::restoreNotesFile(const bool clicked)
 void MainWindow::executeImport(const bool replace)
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-                                                    tr("Open Notes Backup File"), "",
-                                                    tr("Notes Backup File (*.nbk)"));
+        tr("Open Notes Backup File"), "",
+        tr("Notes Backup File (*.nbk)"));
 
     if (fileName.isEmpty()) {
         return;
@@ -2211,7 +2390,8 @@ void MainWindow::executeImport(const bool replace)
         }
 
         QProgressDialog* pd = new QProgressDialog(replace ? "Restoring Notes..."
-                                                          : "Importing Notes...", "", 0, 0, this);
+                                                          : "Importing Notes...",
+            "", 0, 0, this);
         pd->deleteLater();
         pd->setCancelButton(Q_NULLPTR);
         pd->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
@@ -2221,7 +2401,7 @@ void MainWindow::executeImport(const bool replace)
 
         setButtonsAndFieldsEnabled(false);
 
-        if(replace)
+        if (replace)
             emit requestRestoreNotes(noteList);
         else
             emit requestImportNotes(noteList);
@@ -2243,10 +2423,10 @@ void MainWindow::executeImport(const bool replace)
  */
 void MainWindow::exportNotesFile(const bool clicked)
 {
-    Q_UNUSED (clicked)
+    Q_UNUSED(clicked)
     QString fileName = QFileDialog::getSaveFileName(this,
-                                                    tr("Save Notes"), "notes.nbk",
-                                                    tr("Notes Backup File (*.nbk)"));
+        tr("Save Notes"), "notes.nbk",
+        tr("Notes Backup File (*.nbk)"));
     if (fileName.isEmpty()) {
         return;
     } else {
@@ -2266,7 +2446,7 @@ void MainWindow::exportNotesFile(const bool clicked)
 void MainWindow::toggleNoteList()
 {
     bool isCollapsed = (m_splitter->sizes().at(0) == 0);
-    if(isCollapsed) {
+    if (isCollapsed) {
         expandNoteList();
     } else {
         collapseNoteList();
@@ -2285,7 +2465,7 @@ void MainWindow::collapseNoteList()
     m_splitter->setSizes(sizes);
     m_splitter->setCollapsible(0, false);
 
-    if(!m_isFrameRightTopWidgetsVisible) {
+    if (!m_isFrameRightTopWidgetsVisible) {
 #ifdef __APPLE__
         this->setStandardWindowButtonsMacVisibility(false);
 #else
@@ -2312,9 +2492,9 @@ void MainWindow::expandNoteList()
 #ifdef __APPLE__
     this->setStandardWindowButtonsMacVisibility(true);
 #else
-    m_redCloseButton->setVisible(true);
-    m_yellowMinimizeButton->setVisible(true);
-    m_greenMaximizeButton->setVisible(true);
+//    m_redCloseButton->setVisible(true);
+//    m_yellowMinimizeButton->setVisible(true);
+//    m_greenMaximizeButton->setVisible(true);
 #endif
 }
 
@@ -2345,9 +2525,9 @@ void MainWindow::onGreenMaximizeButtonPressed()
 #ifdef _WIN32
     m_greenMaximizeButton->setIcon(QIcon(":images/windows_minimize_pressed.png"));
 #else
-    if(this->windowState() == Qt::WindowFullScreen){
+    if (this->windowState() == Qt::WindowFullScreen) {
         m_greenMaximizeButton->setIcon(QIcon(QStringLiteral(":images/greenInPressed.png")));
-    }else{
+    } else {
         m_greenMaximizeButton->setIcon(QIcon(QStringLiteral(":images/greenPressed.png")));
     }
 #endif
@@ -2360,9 +2540,9 @@ void MainWindow::onGreenMaximizeButtonPressed()
 void MainWindow::onYellowMinimizeButtonPressed()
 {
 #ifdef _WIN32
-    if(this->windowState() == Qt::WindowFullScreen){
+    if (this->windowState() == Qt::WindowFullScreen) {
         m_yellowMinimizeButton->setIcon(QIcon(QStringLiteral(":images/windows_de-maximize_pressed.png")));
-    }else{
+    } else {
         m_yellowMinimizeButton->setIcon(QIcon(QStringLiteral(":images/windows_maximize_pressed.png")));
     }
 #else
@@ -2444,15 +2624,15 @@ void MainWindow::onRedCloseButtonClicked()
  */
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    if(windowState() != Qt::WindowFullScreen) {
+    if (windowState() != Qt::WindowFullScreen) {
         m_settingsDatabase->setValue(QStringLiteral("windowGeometry"), saveGeometry());
-        if(m_styleEditorWindow.windowState() != Qt::WindowFullScreen)
+        if (m_styleEditorWindow.windowState() != Qt::WindowFullScreen)
             m_settingsDatabase->setValue(QStringLiteral("editorSettingsWindowGeometry"), m_styleEditorWindow.saveGeometry());
     }
 
-    if(m_currentSelectedNoteProxy.isValid()
-            &&  m_isContentModified
-            && !m_isTemp){
+    if (m_currentSelectedNoteProxy.isValid()
+        && m_isContentModified
+        && !m_isTemp) {
 
         saveNoteToDB(m_currentSelectedNoteProxy);
     }
@@ -2511,44 +2691,44 @@ void MainWindow::mousePressEvent(QMouseEvent* event)
     m_mousePressX = event->x();
     m_mousePressY = event->y();
 
-    if(event->buttons() == Qt::LeftButton){
-        if(m_mousePressX < this->width() - m_layoutMargin
-                && m_mousePressX >m_layoutMargin
-                && m_mousePressY < this->height() - m_layoutMargin
-                && m_mousePressY > m_layoutMargin){
+    if (event->buttons() == Qt::LeftButton) {
+        if (m_mousePressX < this->width() - m_layoutMargin
+            && m_mousePressX > m_layoutMargin
+            && m_mousePressY < this->height() - m_layoutMargin
+            && m_mousePressY > m_layoutMargin) {
 
             m_canMoveWindow = true;
-//            QApplication::setOverrideCursor(QCursor(Qt::ClosedHandCursor));
+            //            QApplication::setOverrideCursor(QCursor(Qt::ClosedHandCursor));
 
 #ifndef __APPLE__
-        }else{
+        } else {
             m_canStretchWindow = true;
 
             int currentWidth = m_splitter->sizes().at(0);
-            if(currentWidth != 0)
+            if (currentWidth != 0)
                 m_noteListWidth = currentWidth;
 
-            if((m_mousePressX < this->width() && m_mousePressX > this->width() - m_layoutMargin)
-                    && (m_mousePressY < m_layoutMargin && m_mousePressY > 0)){
+            if ((m_mousePressX < this->width() && m_mousePressX > this->width() - m_layoutMargin)
+                && (m_mousePressY < m_layoutMargin && m_mousePressY > 0)) {
                 m_stretchSide = StretchSide::TopRight;
-            }else if((m_mousePressX < this->width() && m_mousePressX > this->width() - m_layoutMargin)
-                     && (m_mousePressY < this->height() && m_mousePressY > this->height() - m_layoutMargin)){
+            } else if ((m_mousePressX < this->width() && m_mousePressX > this->width() - m_layoutMargin)
+                && (m_mousePressY < this->height() && m_mousePressY > this->height() - m_layoutMargin)) {
                 m_stretchSide = StretchSide::BottomRight;
-            }else if((m_mousePressX < m_layoutMargin && m_mousePressX > 0)
-                     && (m_mousePressY < m_layoutMargin && m_mousePressY > 0)){
+            } else if ((m_mousePressX < m_layoutMargin && m_mousePressX > 0)
+                && (m_mousePressY < m_layoutMargin && m_mousePressY > 0)) {
                 m_stretchSide = StretchSide::TopLeft;
-            }else if((m_mousePressX < m_layoutMargin && m_mousePressX > 0)
-                     && (m_mousePressY < this->height() && m_mousePressY > this->height() - m_layoutMargin)){
+            } else if ((m_mousePressX < m_layoutMargin && m_mousePressX > 0)
+                && (m_mousePressY < this->height() && m_mousePressY > this->height() - m_layoutMargin)) {
                 m_stretchSide = StretchSide::BottomLeft;
-            }else if(m_mousePressX < this->width() && m_mousePressX > this->width() - m_layoutMargin){
+            } else if (m_mousePressX < this->width() && m_mousePressX > this->width() - m_layoutMargin) {
                 m_stretchSide = StretchSide::Right;
-            }else if(m_mousePressX < m_layoutMargin && m_mousePressX > 0){
+            } else if (m_mousePressX < m_layoutMargin && m_mousePressX > 0) {
                 m_stretchSide = StretchSide::Left;
-            }else if(m_mousePressY < this->height() && m_mousePressY > this->height() - m_layoutMargin){
+            } else if (m_mousePressY < this->height() && m_mousePressY > this->height() - m_layoutMargin) {
                 m_stretchSide = StretchSide::Bottom;
-            }else if(m_mousePressY < m_layoutMargin && m_mousePressY > 0){
+            } else if (m_mousePressY < m_layoutMargin && m_mousePressY > 0) {
                 m_stretchSide = StretchSide::Top;
-            }else{
+            } else {
                 m_stretchSide = StretchSide::None;
             }
 #endif
@@ -2556,7 +2736,7 @@ void MainWindow::mousePressEvent(QMouseEvent* event)
 
         event->accept();
 
-    }else{
+    } else {
         QMainWindow::mousePressEvent(event);
     }
 }
@@ -2569,36 +2749,36 @@ void MainWindow::mousePressEvent(QMouseEvent* event)
 void MainWindow::mouseMoveEvent(QMouseEvent* event)
 {
 #ifndef __APPLE__
-    if(!m_canStretchWindow && !m_canMoveWindow){
+    if (!m_canStretchWindow && !m_canMoveWindow) {
         m_mousePressX = event->x();
         m_mousePressY = event->y();
 
-        if((m_mousePressX < this->width() && m_mousePressX > this->width() - m_layoutMargin)
-                && (m_mousePressY < m_layoutMargin && m_mousePressY > 0)){
+        if ((m_mousePressX < this->width() && m_mousePressX > this->width() - m_layoutMargin)
+            && (m_mousePressY < m_layoutMargin && m_mousePressY > 0)) {
             m_stretchSide = StretchSide::TopRight;
-        }else if((m_mousePressX < this->width() && m_mousePressX > this->width() - m_layoutMargin)
-                 && (m_mousePressY < this->height() && m_mousePressY > this->height() - m_layoutMargin)){
+        } else if ((m_mousePressX < this->width() && m_mousePressX > this->width() - m_layoutMargin)
+            && (m_mousePressY < this->height() && m_mousePressY > this->height() - m_layoutMargin)) {
             m_stretchSide = StretchSide::BottomRight;
-        }else if((m_mousePressX < m_layoutMargin && m_mousePressX > 0)
-                 && (m_mousePressY < m_layoutMargin && m_mousePressY > 0)){
+        } else if ((m_mousePressX < m_layoutMargin && m_mousePressX > 0)
+            && (m_mousePressY < m_layoutMargin && m_mousePressY > 0)) {
             m_stretchSide = StretchSide::TopLeft;
-        }else if((m_mousePressX < m_layoutMargin && m_mousePressX > 0)
-                 && (m_mousePressY < this->height() && m_mousePressY > this->height() - m_layoutMargin)){
+        } else if ((m_mousePressX < m_layoutMargin && m_mousePressX > 0)
+            && (m_mousePressY < this->height() && m_mousePressY > this->height() - m_layoutMargin)) {
             m_stretchSide = StretchSide::BottomLeft;
-        }else if(m_mousePressX < this->width() && m_mousePressX > this->width() - m_layoutMargin){
+        } else if (m_mousePressX < this->width() && m_mousePressX > this->width() - m_layoutMargin) {
             m_stretchSide = StretchSide::Right;
-        }else if(m_mousePressX < m_layoutMargin && m_mousePressX > 0){
+        } else if (m_mousePressX < m_layoutMargin && m_mousePressX > 0) {
             m_stretchSide = StretchSide::Left;
-        }else if(m_mousePressY < this->height() && m_mousePressY > this->height() - m_layoutMargin){
+        } else if (m_mousePressY < this->height() && m_mousePressY > this->height() - m_layoutMargin) {
             m_stretchSide = StretchSide::Bottom;
-        }else if(m_mousePressY < m_layoutMargin && m_mousePressY > 0){
+        } else if (m_mousePressY < m_layoutMargin && m_mousePressY > 0) {
             m_stretchSide = StretchSide::Top;
-        }else{
+        } else {
             m_stretchSide = StretchSide::None;
         }
     }
 
-    if(!m_canMoveWindow){
+    if (!m_canMoveWindow) {
         switch (m_stretchSide) {
         case StretchSide::Right:
         case StretchSide::Left:
@@ -2617,31 +2797,31 @@ void MainWindow::mouseMoveEvent(QMouseEvent* event)
             ui->centralWidget->setCursor(Qt::SizeFDiagCursor);
             break;
         default:
-            if(!m_canStretchWindow)
+            if (!m_canStretchWindow)
                 ui->centralWidget->setCursor(Qt::ArrowCursor);
             break;
         }
     }
 #endif
 
-    if(m_canMoveWindow){
+    if (m_canMoveWindow) {
         int dx = event->globalX() - m_mousePressX;
         int dy = event->globalY() - m_mousePressY;
-        move (dx, dy);
+        move(dx, dy);
 
     }
 #ifndef __APPLE__
-    else if(m_canStretchWindow && !isMaximized() && !isFullScreen()){
+    else if (m_canStretchWindow && !isMaximized() && !isFullScreen()) {
         int newX = x();
         int newY = y();
         int newWidth = width();
         int newHeight = height();
 
-        int minY =  QApplication::desktop()->availableGeometry().y();
+        int minY = QApplication::desktop()->availableGeometry().y();
 
         switch (m_stretchSide) {
         case StretchSide::Right:
-            newWidth = abs(event->globalX()-this->x()+1);
+            newWidth = abs(event->globalX() - this->x() + 1);
             newWidth = newWidth < minimumWidth() ? minimumWidth() : newWidth;
             break;
         case StretchSide::Left:
@@ -2656,18 +2836,18 @@ void MainWindow::mouseMoveEvent(QMouseEvent* event)
             newY = newY < minY ? minY : newY;
             newY = newY > geometry().bottomRight().y() - minimumHeight() ? geometry().bottomRight().y() - minimumHeight() : newY;
             newHeight = geometry().bottomLeft().y() - newY + 1;
-            newHeight = newHeight < minimumHeight() ? minimumHeight() : newHeight ;
+            newHeight = newHeight < minimumHeight() ? minimumHeight() : newHeight;
 
             break;
         case StretchSide::Bottom:
-            newHeight = abs(event->globalY()-y()+1);
+            newHeight = abs(event->globalY() - y() + 1);
             newHeight = newHeight < minimumHeight() ? minimumHeight() : newHeight;
 
             break;
         case StretchSide::TopLeft:
             newX = event->globalX() - m_mousePressX;
-            newX = newX < 0 ? 0: newX;
-            newX = newX > geometry().bottomRight().x() - minimumWidth() ? geometry().bottomRight().x()-minimumWidth() : newX;
+            newX = newX < 0 ? 0 : newX;
+            newX = newX > geometry().bottomRight().x() - minimumWidth() ? geometry().bottomRight().x() - minimumWidth() : newX;
 
             newY = event->globalY() - m_mousePressY;
             newY = newY < minY ? minY : newY;
@@ -2682,8 +2862,8 @@ void MainWindow::mouseMoveEvent(QMouseEvent* event)
             break;
         case StretchSide::BottomLeft:
             newX = event->globalX() - m_mousePressX;
-            newX = newX < 0 ? 0: newX;
-            newX = newX > geometry().bottomRight().x() - minimumWidth() ? geometry().bottomRight().x()-minimumWidth() : newX;
+            newX = newX < 0 ? 0 : newX;
+            newX = newX > geometry().bottomRight().x() - minimumWidth() ? geometry().bottomRight().x() - minimumWidth() : newX;
 
             newWidth = geometry().bottomRight().x() - newX + 1;
             newWidth = newWidth < minimumWidth() ? minimumWidth() : newWidth;
@@ -2718,7 +2898,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent* event)
 
         setGeometry(newX, newY, newWidth, newHeight);
         QList<int> sizes = m_splitter->sizes();
-        if(sizes[0] != 0){
+        if (sizes[0] != 0) {
             sizes[0] = m_noteListWidth;
             sizes[1] = m_splitter->width() - m_noteListWidth;
             m_splitter->setSizes(sizes);
@@ -2733,7 +2913,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent* event)
  * Initialize flags
  * \param event
  */
-void MainWindow::mouseReleaseEvent(QMouseEvent *event)
+void MainWindow::mouseReleaseEvent(QMouseEvent* event)
 {
     m_canMoveWindow = false;
     m_canStretchWindow = false;
@@ -2748,11 +2928,11 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
  */
 void MainWindow::mousePressEvent(QMouseEvent* event)
 {
-    if (event->button() == Qt::LeftButton){
-        if(event->pos().x() < this->width() - 5
-                && event->pos().x() >5
-                && event->pos().y() < this->height()-5
-                && event->pos().y() > 5){
+    if (event->button() == Qt::LeftButton) {
+        if (event->pos().x() < this->width() - 5
+            && event->pos().x() > 5
+            && event->pos().y() < this->height() - 5
+            && event->pos().y() > 5) {
 
             m_canMoveWindow = true;
             m_mousePressX = event->x();
@@ -2770,12 +2950,11 @@ void MainWindow::mousePressEvent(QMouseEvent* event)
  */
 void MainWindow::mouseMoveEvent(QMouseEvent* event)
 {
-    if(m_canMoveWindow){
-//        this->setCursor(Qt::ClosedHandCursor);
+    if (m_canMoveWindow) {
+        //        this->setCursor(Qt::ClosedHandCursor);
         int dx = event->globalX() - m_mousePressX;
         int dy = event->globalY() - m_mousePressY;
-        move (dx, dy);
-
+        move(dx, dy);
     }
 }
 
@@ -2784,10 +2963,10 @@ void MainWindow::mouseMoveEvent(QMouseEvent* event)
  * Initialize flags
  * \param event
  */
-void MainWindow::mouseReleaseEvent(QMouseEvent *event)
+void MainWindow::mouseReleaseEvent(QMouseEvent* event)
 {
     m_canMoveWindow = false;
-//    this->unsetCursor();
+    //    this->unsetCursor();
     event->accept();
 }
 #endif
@@ -2800,7 +2979,7 @@ void MainWindow::moveNoteToTop()
 {
     // check if the current note is note on the top of the list
     // if true move the note to the top
-    if(m_currentSelectedNoteProxy.isValid()){
+    if (m_currentSelectedNoteProxy.isValid()) {
 
         m_noteView->scrollToTop();
 
@@ -2812,7 +2991,7 @@ void MainWindow::moveNoteToTop()
         // update the current item
         m_currentSelectedNoteProxy = m_proxyModel->mapFromSource(destinationIndex);
         m_noteView->setCurrentIndex(m_currentSelectedNoteProxy);
-    }else{
+    } else {
         qDebug() << "MainWindow::moveNoteTop : m_currentSelectedNoteProxy not valid";
     }
 }
@@ -2854,9 +3033,9 @@ void MainWindow::findNotesContain(const QString& keyword)
     m_editorDateLabel->clear();
     m_textEdit->blockSignals(false);
 
-    if(m_proxyModel->rowCount() > 0){
+    if (m_proxyModel->rowCount() > 0) {
         selectFirstNote();
-    }else{
+    } else {
         m_currentSelectedNoteProxy = QModelIndex();
     }
 }
@@ -2865,11 +3044,11 @@ void MainWindow::findNotesContain(const QString& keyword)
  * \brief MainWindow::selectNote
  * \param noteIndex
  */
-void MainWindow::selectNote(const QModelIndex &noteIndex)
+void MainWindow::selectNote(const QModelIndex& noteIndex)
 {
-    if(noteIndex.isValid()){
+    if (noteIndex.isValid()) {
         // save the position of text edit scrollbar
-        if(!m_isTemp && m_currentSelectedNoteProxy.isValid()){
+        if (!m_isTemp && m_currentSelectedNoteProxy.isValid()) {
             int pos = m_textEdit->verticalScrollBar()->value();
             QModelIndex indexSrc = m_proxyModel->mapToSource(m_currentSelectedNoteProxy);
             m_noteModel->setData(indexSrc, QVariant::fromValue(pos), NoteModel::NoteScrollbarPos);
@@ -2878,25 +3057,25 @@ void MainWindow::selectNote(const QModelIndex &noteIndex)
         // show the content of the pressed note in the text editor
         showNoteInEditor(noteIndex);
 
-        if(m_isTemp && noteIndex.row() != 0){
+        if (m_isTemp && noteIndex.row() != 0) {
             // delete the unmodified new note
             deleteNote(m_currentSelectedNoteProxy, false);
-            m_currentSelectedNoteProxy = m_proxyModel->index(noteIndex.row()-1, 0);
-        }else if(!m_isTemp
-                 && m_currentSelectedNoteProxy.isValid()
-                 && noteIndex != m_currentSelectedNoteProxy
-                 && m_isContentModified){
+            m_currentSelectedNoteProxy = m_proxyModel->index(noteIndex.row() - 1, 0);
+        } else if (!m_isTemp
+            && m_currentSelectedNoteProxy.isValid()
+            && noteIndex != m_currentSelectedNoteProxy
+            && m_isContentModified) {
             // save if the previous selected note was modified
             saveNoteToDB(m_currentSelectedNoteProxy);
             m_currentSelectedNoteProxy = noteIndex;
-        }else{
+        } else {
             m_currentSelectedNoteProxy = noteIndex;
         }
 
         m_noteView->selectionModel()->select(m_currentSelectedNoteProxy, QItemSelectionModel::ClearAndSelect);
         m_noteView->setCurrentIndex(m_currentSelectedNoteProxy);
         m_noteView->scrollTo(m_currentSelectedNoteProxy);
-    }else{
+    } else {
         qDebug() << "MainWindow::selectNote() : noteIndex is not valid";
     }
 }
@@ -2910,11 +3089,11 @@ void MainWindow::checkMigration()
     QDir dir(fi.absolutePath());
 
     QString oldNoteDBPath(dir.path() + QDir::separator() + "Notes.ini");
-    if(QFile::exists(oldNoteDBPath))
+    if (QFile::exists(oldNoteDBPath))
         migrateNote(oldNoteDBPath);
 
     QString oldTrashDBPath(dir.path() + QDir::separator() + "Trash.ini");
-    if(QFile::exists(oldTrashDBPath))
+    if (QFile::exists(oldTrashDBPath))
         migrateTrash(oldTrashDBPath);
 
     emit requestForceLastRowIndexValue(m_noteCounter);
@@ -2930,10 +3109,10 @@ void MainWindow::migrateNote(QString notePath)
     QStringList dbKeys = notesIni.allKeys();
 
     m_noteCounter = notesIni.value(QStringLiteral("notesCounter"), "0").toInt();
-    QList<NoteData *> noteList;
+    QList<NoteData*> noteList;
 
     auto it = dbKeys.begin();
-    for(; it < dbKeys.end()-1; it += 3){
+    for (; it < dbKeys.end() - 1; it += 3) {
         QString noteName = it->split(QStringLiteral("/"))[0];
         int id = noteName.split(QStringLiteral("_"))[1].toInt();
 
@@ -2955,7 +3134,7 @@ void MainWindow::migrateNote(QString notePath)
         noteList.append(newNote);
     }
 
-    if(!noteList.isEmpty())
+    if (!noteList.isEmpty())
         emit requestMigrateNotes(noteList);
 
     QFile oldNoteDBFile(notePath);
@@ -2971,10 +3150,10 @@ void MainWindow::migrateTrash(QString trashPath)
     QSettings trashIni(trashPath, QSettings::IniFormat);
     QStringList dbKeys = trashIni.allKeys();
 
-    QList<NoteData *> noteList;
+    QList<NoteData*> noteList;
 
     auto it = dbKeys.begin();
-    for(; it < dbKeys.end()-1; it += 3){
+    for (; it < dbKeys.end() - 1; it += 3) {
         QString noteName = it->split(QStringLiteral("/"))[0];
         int id = noteName.split(QStringLiteral("_"))[1].toInt();
 
@@ -2996,7 +3175,7 @@ void MainWindow::migrateTrash(QString trashPath)
         noteList.append(newNote);
     }
 
-    if(!noteList.isEmpty())
+    if (!noteList.isEmpty())
         emit requestMigrateTrash(noteList);
 
     QFile oldTrashDBFile(trashPath);
@@ -3013,16 +3192,16 @@ void MainWindow::dropShadow(QPainter& painter, ShadowType type, MainWindow::Shad
 {
     int resizedShadowWidth = m_shadowWidth > m_layoutMargin ? m_layoutMargin : m_shadowWidth;
 
-    QRect mainRect   = rect();
+    QRect mainRect = rect();
 
     QRect innerRect(m_layoutMargin,
-                    m_layoutMargin,
-                    mainRect.width() - 2 * resizedShadowWidth + 1,
-                    mainRect.height() - 2 * resizedShadowWidth + 1);
+        m_layoutMargin,
+        mainRect.width() - 2 * resizedShadowWidth + 1,
+        mainRect.height() - 2 * resizedShadowWidth + 1);
     QRect outerRect(innerRect.x() - resizedShadowWidth,
-                    innerRect.y() - resizedShadowWidth,
-                    innerRect.width() + 2* resizedShadowWidth,
-                    innerRect.height() + 2* resizedShadowWidth);
+        innerRect.y() - resizedShadowWidth,
+        innerRect.width() + 2 * resizedShadowWidth,
+        innerRect.height() + 2 * resizedShadowWidth);
 
     QPoint center;
     QPoint topLeft;
@@ -3033,52 +3212,51 @@ void MainWindow::dropShadow(QPainter& painter, ShadowType type, MainWindow::Shad
     QLinearGradient linearGradient;
 
     switch (side) {
-    case ShadowSide::Left :
-        topLeft     = QPoint(outerRect.left(), innerRect.top() + 1);
+    case ShadowSide::Left:
+        topLeft = QPoint(outerRect.left(), innerRect.top() + 1);
         bottomRight = QPoint(innerRect.left(), innerRect.bottom() - 1);
         shadowStart = QPoint(innerRect.left(), innerRect.top() + 1);
-        shadowStop  = QPoint(outerRect.left(), innerRect.top() + 1);
+        shadowStop = QPoint(outerRect.left(), innerRect.top() + 1);
         break;
-    case ShadowSide::Top :
-        topLeft     = QPoint(innerRect.left() + 1, outerRect.top());
+    case ShadowSide::Top:
+        topLeft = QPoint(innerRect.left() + 1, outerRect.top());
         bottomRight = QPoint(innerRect.right() - 1, innerRect.top());
         shadowStart = QPoint(innerRect.left() + 1, innerRect.top());
-        shadowStop  = QPoint(innerRect.left() + 1, outerRect.top());
+        shadowStop = QPoint(innerRect.left() + 1, outerRect.top());
         break;
-    case ShadowSide::Right :
-        topLeft     = QPoint(innerRect.right(), innerRect.top() + 1);
+    case ShadowSide::Right:
+        topLeft = QPoint(innerRect.right(), innerRect.top() + 1);
         bottomRight = QPoint(outerRect.right(), innerRect.bottom() - 1);
         shadowStart = QPoint(innerRect.right(), innerRect.top() + 1);
-        shadowStop  = QPoint(outerRect.right(), innerRect.top() + 1);
+        shadowStop = QPoint(outerRect.right(), innerRect.top() + 1);
         break;
-    case ShadowSide::Bottom :
-        topLeft     = QPoint(innerRect.left() + 1, innerRect.bottom());
+    case ShadowSide::Bottom:
+        topLeft = QPoint(innerRect.left() + 1, innerRect.bottom());
         bottomRight = QPoint(innerRect.right() - 1, outerRect.bottom());
         shadowStart = QPoint(innerRect.left() + 1, innerRect.bottom());
-        shadowStop  = QPoint(innerRect.left() + 1, outerRect.bottom());
+        shadowStop = QPoint(innerRect.left() + 1, outerRect.bottom());
         break;
     case ShadowSide::TopLeft:
-        topLeft     = outerRect.topLeft();
+        topLeft = outerRect.topLeft();
         bottomRight = innerRect.topLeft();
-        center      = innerRect.topLeft();
+        center = innerRect.topLeft();
         break;
     case ShadowSide::TopRight:
-        topLeft     = QPoint(innerRect.right(), outerRect.top());
+        topLeft = QPoint(innerRect.right(), outerRect.top());
         bottomRight = QPoint(outerRect.right(), innerRect.top());
-        center      = innerRect.topRight();
+        center = innerRect.topRight();
         break;
     case ShadowSide::BottomRight:
-        topLeft     = innerRect.bottomRight();
+        topLeft = innerRect.bottomRight();
         bottomRight = outerRect.bottomRight();
-        center      = innerRect.bottomRight();
+        center = innerRect.bottomRight();
         break;
     case ShadowSide::BottomLeft:
-        topLeft     = QPoint(outerRect.left(), innerRect.bottom());
+        topLeft = QPoint(outerRect.left(), innerRect.bottom());
         bottomRight = QPoint(innerRect.left(), outerRect.bottom());
-        center      = innerRect.bottomLeft();
+        center = innerRect.bottomLeft();
         break;
     }
-
 
     QRect zone(topLeft, bottomRight);
     radialGradient = QRadialGradient(center, resizedShadowWidth, center);
@@ -3087,10 +3265,10 @@ void MainWindow::dropShadow(QPainter& painter, ShadowType type, MainWindow::Shad
     linearGradient.setFinalStop(shadowStop);
 
     switch (type) {
-    case ShadowType::Radial :
+    case ShadowType::Radial:
         fillRectWithGradient(painter, zone, radialGradient);
         break;
-    case ShadowType::Linear :
+    case ShadowType::Linear:
         fillRectWithGradient(painter, zone, linearGradient);
         break;
     }
@@ -3106,14 +3284,14 @@ void MainWindow::fillRectWithGradient(QPainter& painter, const QRect& rect, QGra
 {
     double variance = 0.2;
     double xMax = 1.10;
-    double q = 70/gaussianDist(0, 0, sqrt(variance));
+    double q = 70 / gaussianDist(0, 0, sqrt(variance));
     double nPt = 100.0;
 
-    for(int i=0; i<=nPt; i++){
-        double v = gaussianDist(i*xMax/nPt, 0, sqrt(variance));
+    for (int i = 0; i <= nPt; i++) {
+        double v = gaussianDist(i * xMax / nPt, 0, sqrt(variance));
 
-        QColor c(168, 168, 168, int(q*v));
-        gradient.setColorAt(i/nPt, c);
+        QColor c(168, 168, 168, int(q * v));
+        gradient.setColorAt(i / nPt, c);
     }
 
     painter.fillRect(rect, gradient);
@@ -3128,7 +3306,7 @@ void MainWindow::fillRectWithGradient(QPainter& painter, const QRect& rect, QGra
  */
 double MainWindow::gaussianDist(double x, const double center, double sigma) const
 {
-    return (1.0 / (2 * M_PI * pow(sigma, 2)) * exp( - pow(x - center, 2) / (2 * pow(sigma, 2))));
+    return (1.0 / (2 * M_PI * pow(sigma, 2)) * exp(-pow(x - center, 2) / (2 * pow(sigma, 2))));
 }
 
 /*!
@@ -3136,7 +3314,7 @@ double MainWindow::gaussianDist(double x, const double center, double sigma) con
  * When the blank area at the top of window is double-clicked the window get maximized
  * \param event
  */
-void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
+void MainWindow::mouseDoubleClickEvent(QMouseEvent* event)
 {
 #ifndef __APPLE__
     maximizeWindow();
@@ -3149,7 +3327,7 @@ void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
 /*!
  * \brief MainWindow::leaveEvent
  */
-void MainWindow::leaveEvent(QEvent *)
+void MainWindow::leaveEvent(QEvent*)
 {
     this->unsetCursor();
 }
@@ -3162,37 +3340,45 @@ void MainWindow::setVisibilityOfFrameRightNonEditor(bool isVisible)
 {
     m_isFrameRightTopWidgetsVisible = isVisible;
 
-    if(isVisible) {
+    if (isVisible) {
         m_areNonEditorWidgetsVisible = true;
         m_editorDateLabel->setVisible(true);
         m_newNoteButton->setVisible(true);
         m_trashButton->setVisible(true);
         m_dotsButton->setVisible(true);
-        m_styleEditorButton->setVisible(true);
+        m_boldButton->setVisible(true);
+        m_italicButton->setVisible(true);
+        m_underlineButton->setVisible(true);
+        m_strikeButton->setVisible(true);
+        m_embedImageButton->setVisible(true);
+        m_unorderedButton->setVisible(true);
     } else {
         m_areNonEditorWidgetsVisible = false;
         m_editorDateLabel->setVisible(false);
         m_newNoteButton->setVisible(false);
         m_trashButton->setVisible(false);
         m_dotsButton->setVisible(false);
-        m_styleEditorButton->setVisible(false);
+        m_boldButton->setVisible(false);
+        m_italicButton->setVisible(false);
+        m_underlineButton->setVisible(false);
+        m_strikeButton->setVisible(false);
+        m_embedImageButton->setVisible(false);
+        m_unorderedButton->setVisible(false);
     }
 
-
     // If the notes list is collapsed, hide the window buttons
-    if(m_splitter != Q_NULLPTR) {
+    if (m_splitter != Q_NULLPTR) {
         QList<int> sizes = m_splitter->sizes();
-        if(sizes.at(0) == 0) {
+        if (sizes.at(0) == 0) {
 #ifdef __APPLE__
 
             this->setStandardWindowButtonsMacVisibility(isVisible);
 #else
-            m_redCloseButton->setVisible(isVisible);
-            m_yellowMinimizeButton->setVisible(isVisible);
-            m_greenMaximizeButton->setVisible(isVisible);
+//            m_redCloseButton->setVisible(isVisible);
+//            m_yellowMinimizeButton->setVisible(isVisible);
+//            m_greenMaximizeButton->setVisible(isVisible);
 #endif
         }
-
     }
 }
 
@@ -3203,95 +3389,95 @@ void MainWindow::setVisibilityOfFrameRightNonEditor(bool isVisible)
  * \param event
  * \return
  */
-bool MainWindow::eventFilter(QObject *object, QEvent *event)
+bool MainWindow::eventFilter(QObject* object, QEvent* event)
 {
-    switch (event->type()){
-    case QEvent::Enter:{
-        if(qApp->applicationState() == Qt::ApplicationActive){
+    switch (event->type()) {
+    case QEvent::Enter: {
+        if (qApp->applicationState() == Qt::ApplicationActive) {
 #ifdef _WIN32
-            if(object == m_redCloseButton){
+            if (object == m_redCloseButton) {
                 m_redCloseButton->setIcon(QIcon(QStringLiteral(":images/windows_close_hovered.png")));
             }
 
-            if(object == m_yellowMinimizeButton){
-                if(this->windowState() == Qt::WindowFullScreen){
+            if (object == m_yellowMinimizeButton) {
+                if (this->windowState() == Qt::WindowFullScreen) {
                     m_yellowMinimizeButton->setIcon(QIcon(QStringLiteral(":images/windows_de-maximize_hovered.png")));
-                }else{
-                    m_yellowMinimizeButton->setIcon(QIcon (QStringLiteral(":images/windows_maximize_hovered.png")));
+                } else {
+                    m_yellowMinimizeButton->setIcon(QIcon(QStringLiteral(":images/windows_maximize_hovered.png")));
                 }
             }
 
-            if(object == m_greenMaximizeButton){
+            if (object == m_greenMaximizeButton) {
                 m_greenMaximizeButton->setIcon(QIcon(QStringLiteral(":images/windows_minimize_hovered.png")));
             }
 #else
             // When hovering one of the traffic light buttons (red, yellow, green),
             // set new icons to show their function
-            if(object == m_redCloseButton
-                    || object == m_yellowMinimizeButton
-                    || object == m_greenMaximizeButton){
+            if (object == m_redCloseButton
+                || object == m_yellowMinimizeButton
+                || object == m_greenMaximizeButton) {
 
                 m_redCloseButton->setIcon(QIcon(QStringLiteral(":images/redHovered.png")));
                 m_yellowMinimizeButton->setIcon(QIcon(QStringLiteral(":images/yellowHovered.png")));
-                if(this->windowState() == Qt::WindowFullScreen){
+                if (this->windowState() == Qt::WindowFullScreen) {
                     m_greenMaximizeButton->setIcon(QIcon(QStringLiteral(":images/greenInHovered.png")));
-                }else{
+                } else {
                     m_greenMaximizeButton->setIcon(QIcon(QStringLiteral(":images/greenHovered.png")));
                 }
             }
 #endif
 
-            if(object == m_newNoteButton){
+            if (object == m_newNoteButton) {
                 this->setCursor(Qt::PointingHandCursor);
                 m_newNoteButton->setIcon(QIcon(QStringLiteral(":/images/newNote_Hovered.png")));
             }
 
-            if(object == m_trashButton){
+            if (object == m_trashButton) {
                 this->setCursor(Qt::PointingHandCursor);
                 m_trashButton->setIcon(QIcon(QStringLiteral(":/images/trashCan_Hovered.png")));
             }
 
-            if(object == m_dotsButton){
+            if (object == m_dotsButton) {
                 this->setCursor(Qt::PointingHandCursor);
                 m_dotsButton->setIcon(QIcon(QStringLiteral(":/images/3dots_Hovered.png")));
             }
 
-            if(object == m_styleEditorButton){
+            if (object == m_boldButton) {
                 this->setCursor(Qt::PointingHandCursor);
                 QString ss = QStringLiteral("QPushButton { "
-                                 "  border: none; "
-                                 "  padding: 0px; "
-                                 "  color: rgb(51, 110, 162);"
-                                 "}");
-                m_styleEditorButton->setStyleSheet(ss);
+                                            "  border: none; "
+                                            "  padding: 0px; "
+                                            "  color: rgb(51, 110, 162);"
+                                            "}");
+                m_boldButton->setStyleSheet(ss);
             }
 
-            if(object == ui->frameRightTop && !m_areNonEditorWidgetsVisible){
+            if (object == ui->frameRightTop && !m_areNonEditorWidgetsVisible) {
                 setVisibilityOfFrameRightNonEditor(true);
             }
         }
 
-        if(object == ui->frame){
+        if (object == ui->frame) {
             ui->centralWidget->setCursor(Qt::ArrowCursor);
         }
 
         break;
     }
-    case QEvent::Leave:{
-        if(qApp->applicationState() == Qt::ApplicationActive){
+    case QEvent::Leave: {
+        if (qApp->applicationState() == Qt::ApplicationActive) {
             // When not hovering, change back the icons of the traffic lights to their default icon
-            if(object == m_redCloseButton
-                    || object == m_yellowMinimizeButton
-                    || object == m_greenMaximizeButton){
+            if (object == m_redCloseButton
+                || object == m_yellowMinimizeButton
+                || object == m_greenMaximizeButton) {
 
 #ifdef _WIN32
                 m_redCloseButton->setIcon(QIcon(QStringLiteral(":images/windows_close_regular.png")));
                 m_greenMaximizeButton->setIcon(QIcon(QStringLiteral(":images/windows_minimize_regular.png")));
 
-                if(this->windowState() == Qt::WindowFullScreen){
+                if (this->windowState() == Qt::WindowFullScreen) {
                     m_yellowMinimizeButton->setIcon(QIcon(QStringLiteral(":images/windows_de-maximize_regular.png")));
-                }else{
-                    m_yellowMinimizeButton->setIcon(QIcon (QStringLiteral(":images/windows_maximize_regular.png")));
+                } else {
+                    m_yellowMinimizeButton->setIcon(QIcon(QStringLiteral(":images/windows_maximize_regular.png")));
                 }
 #else
                 m_redCloseButton->setIcon(QIcon(QStringLiteral(":images/red.png")));
@@ -3300,106 +3486,110 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
 #endif
             }
 
-            if(object == m_newNoteButton){
+            if (object == m_newNoteButton) {
                 this->unsetCursor();
                 m_newNoteButton->setIcon(QIcon(QStringLiteral(":/images/newNote_Regular.png")));
             }
 
-            if(object == m_trashButton){
+            if (object == m_trashButton) {
                 this->unsetCursor();
                 m_trashButton->setIcon(QIcon(QStringLiteral(":/images/trashCan_Regular.png")));
             }
 
-            if(object == m_dotsButton){
+            if (object == m_dotsButton) {
                 this->unsetCursor();
                 m_dotsButton->setIcon(QIcon(QStringLiteral(":/images/3dots_Regular.png")));
             }
 
-            if(object == m_styleEditorButton){
+            if (object == m_boldButton) {
                 this->unsetCursor();
                 QString ss = QStringLiteral("QPushButton { "
-                                 "  border: none; "
-                                 "  padding: 0px; "
-                                 "  color: rgb(68, 138, 201);"
-                                 "}");
-                m_styleEditorButton->setStyleSheet(ss);
+                                            "  border: none; "
+                                            "  padding: 0px; "
+                                            "  color: rgb(68, 138, 201);"
+                                            "}");
+                m_boldButton->setStyleSheet(ss);
             }
         }
         break;
     }
-    case QEvent::WindowDeactivate:{
+    case QEvent::WindowDeactivate: {
 
         m_canMoveWindow = false;
         m_canStretchWindow = false;
         QApplication::restoreOverrideCursor();
 
 #ifndef _WIN32
-        m_redCloseButton->setIcon(QIcon(QStringLiteral(":images/unfocusedButton")));
-        m_yellowMinimizeButton->setIcon(QIcon(QStringLiteral(":images/unfocusedButton")));
-        m_greenMaximizeButton->setIcon(QIcon(QStringLiteral(":images/unfocusedButton")));
+//        m_redCloseButton->setIcon(QIcon(QStringLiteral(":images/unfocusedButton")));
+//        m_yellowMinimizeButton->setIcon(QIcon(QStringLiteral(":images/unfocusedButton")));
+//        m_greenMaximizeButton->setIcon(QIcon(QStringLiteral(":images/unfocusedButton")));
 #endif
         m_newNoteButton->setIcon(QIcon(QStringLiteral(":/images/newNote_Regular.png")));
         m_trashButton->setIcon(QIcon(QStringLiteral(":/images/trashCan_Regular.png")));
         m_dotsButton->setIcon(QIcon(QStringLiteral(":/images/3dots_Regular.png")));
+        m_embedImageButton->setIcon(QIcon(QStringLiteral(":/images/image_Regular.png")));
+        m_unorderedButton->setIcon(QIcon(QStringLiteral(":/images/unordered_Regular.png")));
         break;
     }
-    case QEvent::WindowActivate:{
+    case QEvent::WindowActivate: {
 #ifdef _WIN32
-        m_redCloseButton->setIcon(QIcon(QStringLiteral(":images/windows_close_regular.png")));
-        m_greenMaximizeButton->setIcon(QIcon(QStringLiteral(":images/windows_minimize_regular.png")));
+//        m_redCloseButton->setIcon(QIcon(QStringLiteral(":images/windows_close_regular.png")));
+//        m_greenMaximizeButton->setIcon(QIcon(QStringLiteral(":images/windows_minimize_regular.png")));
 
-        if(this->windowState() == Qt::WindowFullScreen){
-            m_yellowMinimizeButton->setIcon(QIcon(QStringLiteral(":images/windows_de-maximize_regular.png")));
-        }else{
-            m_yellowMinimizeButton->setIcon(QIcon (QStringLiteral(":images/windows_maximize_regular.png")));
-        }
+//        if(this->windowState() == Qt::WindowFullScreen){
+//            m_yellowMinimizeButton->setIcon(QIcon(QStringLiteral(":images/windows_de-maximize_regular.png")));
+//        }else{
+//            m_yellowMinimizeButton->setIcon(QIcon (QStringLiteral(":images/windows_maximize_regular.png")));
+//        }
 #else
-        m_redCloseButton->setIcon(QIcon(QStringLiteral(":images/red.png")));
-        m_yellowMinimizeButton->setIcon(QIcon(QStringLiteral(":images/yellow.png")));
-        m_greenMaximizeButton->setIcon(QIcon(QStringLiteral(":images/green.png")));
+//        m_redCloseButton->setIcon(QIcon(QStringLiteral(":images/red.png")));
+//        m_yellowMinimizeButton->setIcon(QIcon(QStringLiteral(":images/yellow.png")));
+//        m_greenMaximizeButton->setIcon(QIcon(QStringLiteral(":images/green.png")));
 #endif
         m_newNoteButton->setIcon(QIcon(QStringLiteral(":/images/newNote_Regular.png")));
         m_trashButton->setIcon(QIcon(QStringLiteral(":/images/trashCan_Regular.png")));
         m_dotsButton->setIcon(QIcon(QStringLiteral(":/images/3dots_Regular.png")));
+        m_embedImageButton->setIcon(QIcon(QStringLiteral(":/images/image_Regular.png")));
+        m_unorderedButton->setIcon(QIcon(QStringLiteral(":/images/unordered_Regular.png")));
         break;
     }
 #ifndef __APPLE__
-    case QEvent::HoverEnter:{
-        if(object == m_textEdit->verticalScrollBar()){
+    case QEvent::HoverEnter: {
+        if (object == m_textEdit->verticalScrollBar()) {
             bool isSearching = !m_searchEdit->text().isEmpty();
-            if(isSearching)
+            if (isSearching)
                 m_textEdit->setFocusPolicy(Qt::NoFocus);
         }
         break;
     }
-    case QEvent::HoverLeave:{
+    case QEvent::HoverLeave: {
         bool isNoButtonClicked = qApp->mouseButtons() == Qt::NoButton;
-        if(isNoButtonClicked){
-            if(object == m_textEdit->verticalScrollBar()){
+        if (isNoButtonClicked) {
+            if (object == m_textEdit->verticalScrollBar()) {
                 m_textEdit->setFocusPolicy(Qt::StrongFocus);
             }
         }
         break;
     }
-    case QEvent::MouseButtonRelease:{
+    case QEvent::MouseButtonRelease: {
         bool isMouseOnScrollBar = qApp->widgetAt(QCursor::pos()) != m_textEdit->verticalScrollBar();
-        if(isMouseOnScrollBar){
-            if(object == m_textEdit->verticalScrollBar()){
+        if (isMouseOnScrollBar) {
+            if (object == m_textEdit->verticalScrollBar()) {
                 m_textEdit->setFocusPolicy(Qt::StrongFocus);
             }
         }
         break;
     }
 #endif
-    case QEvent::FocusIn:{
-        if(object == m_textEdit){
-            if(!m_isOperationRunning){
-                if(!m_searchEdit->text().isEmpty()){
-                    if(!m_currentSelectedNoteProxy.isValid()){
+    case QEvent::FocusIn: {
+        if (object == m_textEdit) {
+            if (!m_isOperationRunning) {
+                if (!m_searchEdit->text().isEmpty()) {
+                    if (!m_currentSelectedNoteProxy.isValid()) {
                         clearSearch();
                         createNewNote();
                     }
-                }else if(m_proxyModel->rowCount() == 0){
+                } else if (m_proxyModel->rowCount() == 0) {
                     createNewNote();
                 }
             }
@@ -3407,45 +3597,45 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
             m_textEdit->setFocus();
         }
 
-        if(object == m_searchEdit){
+        if (object == m_searchEdit) {
             setSearchEditStyleSheet(true);
         }
         break;
     }
-    case QEvent::FocusOut:{
-        if(object == m_searchEdit){
+    case QEvent::FocusOut: {
+        if (object == m_searchEdit) {
             setSearchEditStyleSheet(false);
         }
         break;
     }
-    case QEvent::Resize:{
-        if(m_textEdit->width() < m_smallEditorWidth) {
+    case QEvent::Resize: {
+        if (m_textEdit->width() < m_smallEditorWidth) {
             m_currentMinimumEditorPadding = 15;
-        } else if(m_textEdit->width() > m_smallEditorWidth && m_textEdit->width() < 515) {
+        } else if (m_textEdit->width() > m_smallEditorWidth && m_textEdit->width() < 515) {
             m_currentMinimumEditorPadding = 40;
-        } else if(m_textEdit->width() > 515 && m_textEdit->width() < 755) {
+        } else if (m_textEdit->width() > 515 && m_textEdit->width() < 755) {
             m_currentMinimumEditorPadding = 50;
-        } else if(m_textEdit->width() > 755 && m_textEdit->width() < 775) {
+        } else if (m_textEdit->width() > 755 && m_textEdit->width() < 775) {
             m_currentMinimumEditorPadding = 60;
-        } else if(m_textEdit->width() > 775 && m_textEdit->width() < 800) {
+        } else if (m_textEdit->width() > 775 && m_textEdit->width() < 800) {
             m_currentMinimumEditorPadding = 70;
-        } else if(m_textEdit->width() > 800) {
+        } else if (m_textEdit->width() > 800) {
             m_currentMinimumEditorPadding = 80;
         }
 
         setCurrentFontBasedOnTypeface(m_currentFontTypeface);
 
-//        alignTextEditText();
+        //        alignTextEditText();
     }
     case QEvent::Show:
-        if(object == &m_updater){
+        if (object == &m_updater) {
 
             QRect rect = m_updater.geometry();
             QRect appRect = geometry();
-            int titleBarHeight = 28 ;
+            int titleBarHeight = 28;
 
-            int x = int(appRect.x() + (appRect.width() - rect.width())/2.0);
-            int y = int(appRect.y() + titleBarHeight  + (appRect.height() - rect.height())/2.0);
+            int x = int(appRect.x() + (appRect.width() - rect.width()) / 2.0);
+            int y = int(appRect.y() + titleBarHeight + (appRect.height() - rect.height()) / 2.0);
 
             m_updater.setGeometry(QRect(x, y, rect.width(), rect.height()));
         }
@@ -3454,32 +3644,26 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
     case QEvent::MouseButtonDblClick:
         // Only allow double click (maximise/minimise) or dragging (move)
         // from the top part of the window
-        if(object == ui->frame){
+        if (object == ui->frame) {
             QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-            if(mouseEvent->y() >= ui->searchEdit->y()){
+            if (mouseEvent->y() >= ui->searchEdit->y()) {
                 return true;
             }
         }
         break;
-    case QEvent::KeyPress:
-    {
-        auto *keyEvent = static_cast<QKeyEvent *>(event);
+    case QEvent::KeyPress: {
+        auto* keyEvent = static_cast<QKeyEvent*>(event);
         if (keyEvent->key() == Qt::Key_Return && m_searchEdit->text().isEmpty()) {
             setFocusOnText();
-        } else if (keyEvent->key() == Qt::Key_Return &&
-                   keyEvent->modifiers().testFlag(Qt::ControlModifier)) {
+        } else if (keyEvent->key() == Qt::Key_Return && keyEvent->modifiers().testFlag(Qt::ControlModifier)) {
             setFocusOnText();
             return true;
         }
         break;
     }
-    case QEvent::MouseMove:
-    {
+    case QEvent::MouseMove: {
         // Apperantly we need this if m_layoutMargin is set to 0
-        if(object == ui->frame ||
-                object == ui->frameLeft ||
-                object == ui->frameRight ||
-                object == ui->frameRightTop)
+        if (object == ui->frame || object == ui->frameLeft || object == ui->frameRight || object == ui->frameRightTop)
             mouseMoveEvent(static_cast<QMouseEvent*>(event));
     }
     default:
@@ -3518,7 +3702,7 @@ void MainWindow::stayOnTop(bool checked)
 void MainWindow::askBeforeSettingNativeWindowFrame()
 {
 #ifdef _WIN32
-    if(!m_useNativeWindowFrame) {
+    if (!m_useNativeWindowFrame) {
         QMessageBox msgBox;
         msgBox.setText(tr("Warning: After performing this action, you will need to restart your system to revert to custom decoration."));
         msgBox.setInformativeText(tr("Would you like to continue?"));
@@ -3545,17 +3729,17 @@ void MainWindow::adjustUpperWidgets(bool shouldPushUp)
     const QSizePolicy policy = ui->verticalSpacer_upSearchEdit->sizePolicy();
     const int width = ui->verticalSpacer_upSearchEdit->sizeHint().width();
     ui->verticalSpacer_upSearchEdit->changeSize(width,
-                                                shouldPushUp ? ui->verticalSpacer_upScrollArea->sizeHint().height() : 25,
-                                                policy.horizontalPolicy(),
-                                                policy.verticalPolicy());
+        shouldPushUp ? ui->verticalSpacer_upScrollArea->sizeHint().height() : 20,
+        policy.horizontalPolicy(),
+        policy.verticalPolicy());
     ui->verticalLayout_scrollArea->invalidate();
 
     // TODO: For some reason the layout update itself only when a button is being hovered upon
     // Adjust space above text editor
     ui->verticalSpacer_upEditorDateLabel->changeSize(width,
-                                                     shouldPushUp ? ui->verticalSpacer_upScrollArea->sizeHint().height() : 25,
-                                                     policy.horizontalPolicy(),
-                                                     policy.verticalPolicy());
+        shouldPushUp ? ui->verticalSpacer_upScrollArea->sizeHint().height() : 20,
+        policy.horizontalPolicy(),
+        policy.verticalPolicy());
     ui->verticalLayout_textEdit->invalidate();
 }
 
@@ -3572,17 +3756,17 @@ void MainWindow::setUseNativeWindowFrame(bool useNativeWindowFrame)
     m_settingsDatabase->setValue(QStringLiteral("useNativeWindowFrame"), useNativeWindowFrame);
 
 #ifndef __APPLE__
-    m_greenMaximizeButton->setVisible(!useNativeWindowFrame);
-    m_redCloseButton->setVisible(!useNativeWindowFrame);
-    m_yellowMinimizeButton->setVisible(!useNativeWindowFrame);
+    //    m_greenMaximizeButton->setVisible(!useNativeWindowFrame);
+    //    m_redCloseButton->setVisible(!useNativeWindowFrame);
+    //    m_yellowMinimizeButton->setVisible(!useNativeWindowFrame);
 
     auto flags = windowFlags();
 
 #if defined(Q_OS_LINUX)
-    if (useNativeWindowFrame)
-        flags &= ~Qt::FramelessWindowHint;
-    else
-        flags |= Qt::FramelessWindowHint;
+//    if (useNativeWindowFrame)
+//        flags &= ~Qt::FramelessWindowHint;
+//    else
+//        flags |= Qt::FramelessWindowHint;
 #elif _WIN32
     if (useNativeWindowFrame)
         flags &= ~Qt::CustomizeWindowHint;
@@ -3593,24 +3777,23 @@ void MainWindow::setUseNativeWindowFrame(bool useNativeWindowFrame)
     setWindowFlags(flags);
 #endif
 
+    //#if defined(Q_OS_LINUX)
+    //    if (useNativeWindowFrame || isMaximized()) {
+    //        ui->centralWidget->layout()->setContentsMargins(QMargins());
+    //    } else {
+    //        QMargins margins(m_layoutMargin,m_layoutMargin,m_layoutMargin,m_layoutMargin);
+    //        ui->centralWidget->layout()->setContentsMargins(margins);
+    //    }
+    //#endif
 
-//#if defined(Q_OS_LINUX)
-//    if (useNativeWindowFrame || isMaximized()) {
-//        ui->centralWidget->layout()->setContentsMargins(QMargins());
-//    } else {
-//        QMargins margins(m_layoutMargin,m_layoutMargin,m_layoutMargin,m_layoutMargin);
-//        ui->centralWidget->layout()->setContentsMargins(margins);
-//    }
-//#endif
-
-//#ifndef _WIN32
-//    if (useNativeWindowFrame || isMaximized()) {
-//        ui->centralWidget->layout()->setContentsMargins(QMargins());
-//    } else {
-//        QMargins margins(m_layoutMargin,m_layoutMargin,m_layoutMargin,m_layoutMargin);
-//        ui->centralWidget->layout()->setContentsMargins(margins);
-//    }
-//#endif
+    //#ifndef _WIN32
+    //    if (useNativeWindowFrame || isMaximized()) {
+    //        ui->centralWidget->layout()->setContentsMargins(QMargins());
+    //    } else {
+    //        QMargins margins(m_layoutMargin,m_layoutMargin,m_layoutMargin,m_layoutMargin);
+    //        ui->centralWidget->layout()->setContentsMargins(margins);
+    //    }
+    //#endif
 
     adjustUpperWidgets(useNativeWindowFrame);
 
@@ -3630,10 +3813,11 @@ void MainWindow::toggleStayOnTop()
  */
 void MainWindow::onSearchEditReturnPressed()
 {
-    if (m_searchEdit->text().isEmpty()) return;
+    if (m_searchEdit->text().isEmpty())
+        return;
 
     QString searchText = m_searchEdit->text();
-    QTextDocument *doc = m_textEdit->document();
+    QTextDocument* doc = m_textEdit->document();
     //get current cursor
     QTextCursor from = m_textEdit->textCursor();
     //search
@@ -3651,7 +3835,228 @@ void MainWindow::setMargins(QMargins margins)
         return;
 
     ui->centralWidget->layout()->setContentsMargins(margins);
-    m_trafficLightLayout.setGeometry(QRect(4+margins.left(),4+margins.top(),56,16));
+    //    m_trafficLightLayout.setGeometry(QRect(4+margins.left(),4+margins.top(),56,16));
+}
+
+void MainWindow::mergeFormatOnWordOrSelection(const QTextCharFormat& format)
+{
+    QTextCursor cur = m_textEdit->textCursor();
+    if (!cur.hasSelection()) { // apply to the word only if the cusor isn't at its end
+        QTextCursor tmp = cur;
+        tmp.movePosition(QTextCursor::EndOfWord);
+        if (tmp.position() > cur.position())
+            cur.select(QTextCursor::WordUnderCursor);
+    }
+    if (!cur.hasSelection())
+        m_textEdit->mergeCurrentCharFormat(format); // alows to type with the new format
+    else
+        cur.mergeCharFormat(format);
+    /* correct the pressed states of the format buttons if necessary */
+    formatChanged(m_textEdit->currentCharFormat());
+}
+
+void MainWindow::formatChanged(const QTextCharFormat& format)
+{
+    //    if (format.fontWeight() == QFont::Bold)
+    //        ui->boldButton->setChecked (true);
+    //    else
+    //        ui->boldButton->setChecked (false);
+    //    ui->italicButton->setChecked (format.fontItalic());
+    //    ui->underlineButton->setChecked (format.fontUnderline());
+    //    ui->strikeButton->setChecked (format.fontStrikeOut());
+}
+
+void MainWindow::makeBold()
+{
+    QTextCharFormat fmt;
+    fmt.setFontWeight(ui->boldButton->isChecked() ? QFont::Bold : QFont::Normal);
+    mergeFormatOnWordOrSelection(fmt);
+}
+
+void MainWindow::makeItalic()
+{
+    QTextCharFormat fmt;
+    fmt.setFontItalic(ui->italicButton->isChecked());
+    mergeFormatOnWordOrSelection(fmt);
+}
+
+void MainWindow::makeStriked()
+{
+    QTextCharFormat fmt;
+    fmt.setFontStrikeOut(ui->strikeButton->isChecked());
+    mergeFormatOnWordOrSelection(fmt);
+}
+
+void MainWindow::embedImage()
+{
+    QDialog* dialog = new QDialog(this);
+    dialog->setWindowTitle(tr("Embed Image"));
+    QGridLayout* grid = new QGridLayout;
+    grid->setSpacing(5);
+    grid->setContentsMargins(5, 5, 5, 5);
+
+    /* create the needed widgets */
+    ImagePathEntry_ = new LineEdit();
+    ImagePathEntry_->returnOnClear = false;
+    ImagePathEntry_->setMinimumWidth(200);
+    ImagePathEntry_->setToolTip(tr("Image path"));
+    connect(ImagePathEntry_, &QLineEdit::returnPressed, dialog, &QDialog::accept);
+    QToolButton* openBtn = new QToolButton();
+    openBtn->setIcon(symbolicIcon::icon(":images/document-open.svg"));
+    openBtn->setToolTip(tr("Open image"));
+    connect(openBtn, &QAbstractButton::clicked, this, &MainWindow::setImagePath);
+    QLabel* label = new QLabel();
+    label->setText(tr("Scale to"));
+    SpinBox* spinBox = new SpinBox();
+    spinBox->setRange(1, 200);
+    spinBox->setValue(imgScale_);
+    spinBox->setSuffix(tr("%"));
+    spinBox->setToolTip(tr("Scaling percentage"));
+    connect(spinBox, &SpinBox::returnPressed, dialog, &QDialog::accept);
+    QSpacerItem* spacer = new QSpacerItem(1, 10);
+    QPushButton* cancelButton = new QPushButton(symbolicIcon::icon(":images/dialog-cancel.svg"), tr("Cancel"));
+    QPushButton* okButton = new QPushButton(symbolicIcon::icon(":images/dialog-ok.svg"), tr("OK"));
+    connect(cancelButton, &QAbstractButton::clicked, dialog, &QDialog::reject);
+    connect(okButton, &QAbstractButton::clicked, dialog, &QDialog::accept);
+
+    /* make the widgets fit in the grid */
+    grid->addWidget(ImagePathEntry_, 0, 0, 1, 4);
+    grid->addWidget(openBtn, 0, 4, Qt::AlignCenter);
+    grid->addWidget(label, 1, 0, Qt::AlignRight);
+    grid->addWidget(spinBox, 1, 1, Qt::AlignLeft);
+    grid->addItem(spacer, 2, 0);
+    grid->addWidget(cancelButton, 3, 2, Qt::AlignRight);
+    grid->addWidget(okButton, 3, 3, 1, 2, Qt::AlignCenter);
+    grid->setColumnStretch(1, 1);
+    grid->setRowStretch(2, 1);
+
+    /* show the dialog */
+    dialog->setLayout(grid);
+    /*dialog->resize (dialog->minimumWidth(),
+                    dialog->minimumHeight());*/
+    //dialog->setFixedHeight (dialog->sizeHint().height());
+    /*dialog->show();
+    dialog->move (x() + width()/2 - dialog->width(),
+                  y() + height()/2 - dialog->height());*/
+
+    switch (dialog->exec()) {
+    case QDialog::Accepted:
+        lastImgPath_ = ImagePathEntry_->text();
+        imgScale_ = spinBox->value();
+        delete dialog;
+        ImagePathEntry_ = nullptr;
+        break;
+    case QDialog::Rejected:
+    default:
+        lastImgPath_ = ImagePathEntry_->text();
+        delete dialog;
+        ImagePathEntry_ = nullptr;
+        return;
+    }
+
+    imageEmbed(lastImgPath_);
+}
+
+void MainWindow::makeUnorderedList()
+{
+    bool v = ui->unorderedButton->isChecked();
+    QTextCursor cur = m_textEdit->textCursor();
+    if (v) {
+        QTextListFormat listFormat;
+        listFormat.setStyle(QTextListFormat::ListDisc);
+        cur.createList(listFormat);
+    } else {
+        cur.setBlockFormat(QTextBlockFormat());
+        //    cur.movePosition(QTextCursor::NextBlock);
+        //      cur.insertBlock(QTextBlockFormat());
+        m_textEdit->setTextCursor(cur);
+    }
+}
+
+void MainWindow::setImagePath(bool)
+{
+    QString path;
+    if (!lastImgPath_.isEmpty()) {
+        if (QFile::exists(lastImgPath_))
+            path = lastImgPath_;
+        else {
+            QDir dir = QFileInfo(lastImgPath_).absoluteDir();
+            if (!dir.exists())
+                dir = QDir::home();
+            path = dir.path();
+        }
+    } else
+        path = QDir::home().path();
+
+    QString imagePath;
+    FileDialog dialog(this);
+    dialog.setAcceptMode(QFileDialog::AcceptOpen);
+    dialog.setWindowTitle(tr("Open Image..."));
+    dialog.setFileMode(QFileDialog::ExistingFiles);
+    dialog.setNameFilter(tr("Image Files (*.svg *.png *.jpg *.jpeg *.bmp *.gif);;All Files (*)"));
+    if (QFileInfo(path).isDir())
+        dialog.setDirectory(path);
+    else {
+        dialog.setDirectory(path.section("/", 0, -2)); // workaround for KDE
+        dialog.selectFile(path);
+        dialog.autoScroll();
+    }
+    if (dialog.exec()) {
+        QStringList files = dialog.selectedFiles();
+        if (files.count() > 0)
+            imagePath = files.at(0);
+    }
+
+    if (!imagePath.isEmpty())
+        ImagePathEntry_->setText(imagePath);
+}
+
+void MainWindow::imageEmbed(const QString& path)
+{
+    if (path.isEmpty())
+        return;
+
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly))
+        return;
+    /* read the data serialized from the file */
+    QDataStream in(&file);
+    QByteArray rawarray;
+    QDataStream datastream(&rawarray, QIODevice::WriteOnly);
+    char a;
+    /* copy between the two data streams */
+    while (in.readRawData(&a, 1) != 0)
+        datastream.writeRawData(&a, 1);
+    file.close();
+    QByteArray base64array = rawarray.toBase64();
+
+    QImage img = QImage(path);
+    QSize imgSize = img.size();
+    int w, h;
+    if (QObject::sender() == ui->embedImageButton) {
+        w = imgSize.width() * imgScale_ / 100;
+        h = imgSize.height() * imgScale_ / 100;
+    } else {
+        w = imgSize.width();
+        h = imgSize.height();
+    }
+    //    TextEdit *textEdit = qobject_cast<TextEdit*>(ui->stackedWidget->currentWidget());
+    //QString ("<img src=\"data:image/png;base64,%1\">")
+    m_textEdit->insertHtml(QString("<img src=\"data:image;base64,%1\" width=\"%2\" height=\"%3\" />")
+                               .arg(QString(base64array))
+                               .arg(w)
+                               .arg(h));
+
+    raise();
+    if (!isWayland_)
+        activateWindow();
+}
+
+void MainWindow::makeUnderlined()
+{
+    QTextCharFormat fmt;
+    fmt.setFontUnderline(ui->underlineButton->isChecked());
+    mergeFormatOnWordOrSelection(fmt);
 }
 
 /*!
@@ -3671,7 +4076,7 @@ void MainWindow::highlightSearch() const
     highlightFormat.setBackground(Qt::yellow);
 
     while (m_textEdit->find(searchString))
-        extraSelections.append({ m_textEdit->textCursor(), highlightFormat});
+        extraSelections.append({ m_textEdit->textCursor(), highlightFormat });
 
     if (!extraSelections.isEmpty()) {
         m_textEdit->setTextCursor(extraSelections.first().cursor);

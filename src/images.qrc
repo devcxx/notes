@@ -47,5 +47,14 @@
         <file>images/decrease-width-dark.png</file>
         <file>images/increase-width-dark.png</file>
         <file>images/increase-width.png</file>
+        <file>images/image_Hovered.png</file>
+        <file>images/image_Pressed.png</file>
+        <file>images/image_Regular.png</file>
+        <file>images/dialog-cancel.svg</file>
+        <file>images/dialog-ok.svg</file>
+        <file>images/document-open.svg</file>
+        <file>images/unordered_Hovered.png</file>
+        <file>images/unordered_Pressed.png</file>
+        <file>images/unordered_Regular.png</file>
     </qresource>
 </RCC>

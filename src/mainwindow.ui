@@ -129,7 +129,7 @@ NoteData #dateLabel{
          <widget class="QFrame" name="frameLeft">
           <property name="minimumSize">
            <size>
-            <width>185</width>
+            <width>240</width>
             <height>0</height>
            </size>
           </property>
@@ -168,23 +168,7 @@ NoteData #dateLabel{
                <property name="sizeHint" stdset="0">
                 <size>
                  <width>20</width>
-                 <height>25</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <spacer name="verticalSpacer">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Minimum</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>2</height>
+                 <height>10</height>
                 </size>
                </property>
               </spacer>
@@ -227,7 +211,7 @@ NoteData #dateLabel{
                  <property name="minimumSize">
                   <size>
                    <width>0</width>
-                   <height>22</height>
+                   <height>30</height>
                   </size>
                  </property>
                  <property name="maximumSize">
@@ -301,7 +285,7 @@ NoteData #dateLabel{
                <property name="sizeHint" stdset="0">
                 <size>
                  <width>20</width>
-                 <height>9</height>
+                 <height>20</height>
                 </size>
                </property>
               </spacer>
@@ -517,7 +501,30 @@ NoteData #dateLabel{
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="styleEditorButton">
+                 <widget class="QPushButton" name="unorderedButton">
+                  <property name="minimumSize">
+                   <size>
+                    <width>33</width>
+                    <height>25</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="images.qrc">
+                    <normaloff>:/images/unordered_Regular.png</normaloff>:/images/unordered_Regular.png</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>18</width>
+                    <height>18</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="boldButton">
                   <property name="minimumSize">
                    <size>
                     <width>33</width>
@@ -529,6 +536,71 @@ NoteData #dateLabel{
                   </property>
                   <property name="text">
                    <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="italicButton">
+                  <property name="minimumSize">
+                   <size>
+                    <width>33</width>
+                    <height>25</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="underlineButton">
+                  <property name="minimumSize">
+                   <size>
+                    <width>33</width>
+                    <height>25</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="strikeButton">
+                  <property name="minimumSize">
+                   <size>
+                    <width>33</width>
+                    <height>25</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="embedImageButton">
+                  <property name="minimumSize">
+                   <size>
+                    <width>33</width>
+                    <height>25</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="images.qrc">
+                    <normaloff>:/images/image_Regular.png</normaloff>:/images/image_Regular.png</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>18</width>
+                    <height>18</height>
+                   </size>
+                  </property>
+                  <property name="autoRepeatInterval">
+                   <number>102</number>
                   </property>
                  </widget>
                 </item>
@@ -557,7 +629,6 @@ NoteData #dateLabel{
                    <font>
                     <family>Arial</family>
                     <pointsize>10</pointsize>
-                    <weight>75</weight>
                     <bold>true</bold>
                    </font>
                   </property>
@@ -709,7 +780,7 @@ color: rgb(132, 132, 132);
             </widget>
            </item>
            <item>
-            <widget class="CustomDocument" name="textEdit">
+            <widget class="CustomDocument" name="textEdit" native="true">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                <horstretch>0</horstretch>
@@ -726,7 +797,6 @@ color: rgb(132, 132, 132);
               <font>
                <family>Arial</family>
                <pointsize>11</pointsize>
-               <weight>50</weight>
                <italic>false</italic>
                <bold>false</bold>
               </font>
@@ -740,29 +810,16 @@ color: rgb(132, 132, 132);
              <property name="styleSheet">
               <string notr="true"/>
              </property>
-             <property name="frameShape">
-              <enum>QFrame::NoFrame</enum>
-             </property>
-             <property name="tabChangesFocus">
+             <property name="tabChangesFocus" stdset="0">
               <bool>false</bool>
              </property>
-             <property name="documentTitle">
+             <property name="documentTitle" stdset="0">
               <string/>
              </property>
-             <property name="undoRedoEnabled">
+             <property name="undoRedoEnabled" stdset="0">
               <bool>true</bool>
              </property>
-             <property name="lineWrapColumnOrWidth">
-              <number>0</number>
-             </property>
-             <property name="html">
-              <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Arial'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Ubuntu'; font-size:14pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-             </property>
-             <property name="placeholderText">
+             <property name="placeholderText" stdset="0">
               <string/>
              </property>
             </widget>
@@ -786,7 +843,7 @@ p, li { white-space: pre-wrap; }
   </customwidget>
   <customwidget>
    <class>CustomDocument</class>
-   <extends>QTextEdit</extends>
+   <extends>QWidget</extends>
    <header>customDocument.h</header>
   </customwidget>
  </customwidgets>

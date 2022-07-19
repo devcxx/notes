@@ -6,7 +6,7 @@
 
 VERSION = 1.5.0
 
-QT += core gui widgets network sql
+QT += core gui widgets network sql xml svg
 QT += gui-private
 QT += concurrent
 
@@ -19,7 +19,11 @@ MOC_DIR = moc
 RCC_DIR = qrc
 OBJECTS_DIR = obj
 
-include ($$PWD/../3rdParty/qxt/qxt.pri)
+TRANSLATIONS += \
+    $$PWD/translations/zh_CN.ts \
+    $$PWD/translations/qt_zh_CN.ts \
+
+#include ($$PWD/../3rdParty/qxt/qxt.pri)
 include ($$PWD/../3rdParty/QSimpleUpdater/QSimpleUpdater.pri)
 include ($$PWD/../3rdParty/qmarkdowntextedit/qmarkdowntextedit.pri)
 include ($$PWD/../3rdParty/qautostart/src/qautostart.pri)
@@ -37,7 +41,14 @@ SOURCES += \
     aboutwindow.cpp \
     customdocument.cpp \
     editorsettingsbutton.cpp \
-    styleeditorwindow.cpp
+    styleeditorwindow.cpp \
+    $$PWD/colorLabel.cpp \
+    $$PWD/domitem.cpp \
+    $$PWD/dommodel.cpp \
+    $$PWD/textedit.cpp \
+    $$PWD/vscrollbar.cpp \
+    $$PWD/lineedit.cpp \
+    $$PWD/svgicons.cpp \
 
 HEADERS  += \
     $$PWD/mainwindow.h \
@@ -52,7 +63,17 @@ HEADERS  += \
     customDocument.h \
     editorsettingsbutton.h \
     framelesswindow.h \
-    styleeditorwindow.h
+    styleeditorwindow.h \
+    colorLabel.h \
+    $$PWD/domitem.h \
+    $$PWD/dommodel.h \
+    $$PWD/messagebox.h \
+    $$PWD/textedit.h \
+    $$PWD/vscrollbar.h \
+    $$PWD/lineedit.h \
+    $$PWD/svgicons.h \
+    $$PWD/spinbox.h \
+    $$PWD/filedialog.h \
 
 FORMS += \
     $$PWD/mainwindow.ui \
@@ -63,7 +84,8 @@ FORMS += \
 RESOURCES += \
     $$PWD/images.qrc \
     $$PWD/fonts.qrc \
-    $$PWD/styles.qrc
+    $$PWD/styles.qrc \
+    translations.qrc
 
 linux:!android {
     isEmpty (PREFIX) {
@@ -137,8 +159,11 @@ linux:!android {
                            appimage
 }
 
+
+Release:DESTDIR = $$PWD/../bin
+Debug:DESTDIR = $$PWD/../bin_debug
+
 macx {
-    DESTDIR = $$PWD/../bin
     ICON = $$PWD/images\notes_icon.icns
     OBJECTIVE_SOURCES += \
                 framelesswindow.mm
@@ -146,7 +171,6 @@ macx {
 }
 
 win32 {
-    DESTDIR = $$PWD/../bin
     RC_FILE = $$PWD/images\notes.rc
     SOURCES += \
         framelesswindow.cpp

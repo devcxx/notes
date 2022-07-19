@@ -2,7 +2,7 @@
 #include <QDebug>
 
 CustomDocument::CustomDocument(QWidget *parent)
-    : QTextEdit(parent)
+    : TextEdit(parent)
 {
 
 }
