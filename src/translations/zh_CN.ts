@@ -228,7 +228,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../mainwindow.ui" line="26"/>
         <source>Notes</source>
-        <translation type="unfinished">便签</translation>
+        <translation type="unfinished">笔记</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="265"/>
@@ -239,7 +239,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../mainwindow.cpp" line="62"/>
         <location filename="../mainwindow.cpp" line="189"/>
         <source>&amp;Hide Notes</source>
-        <translation type="unfinished">&amp;隐藏便签</translation>
+        <translation type="unfinished">&amp;隐藏笔记</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="63"/>
@@ -256,17 +256,17 @@ p, li { white-space: pre-wrap; }
         <location filename="../mainwindow.cpp" line="2534"/>
         <location filename="../mainwindow.cpp" line="2556"/>
         <source>&amp;Show Notes</source>
-        <translation type="unfinished">&amp;显示便签</translation>
+        <translation type="unfinished">&amp;显示笔记</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="335"/>
         <source>Create New Note</source>
-        <translation type="unfinished">创建新便签</translation>
+        <translation type="unfinished">创建新笔记</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="336"/>
         <source>Delete Selected Note</source>
-        <translation type="unfinished">删除选中便签</translation>
+        <translation type="unfinished">删除选中笔记</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="337"/>
@@ -311,17 +311,17 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../mainwindow.cpp" line="1430"/>
         <source>Import/Export Notes</source>
-        <translation type="unfinished">导入/导出 便签</translation>
+        <translation type="unfinished">导入/导出 笔记</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1447"/>
         <source>Show notes list</source>
-        <translation type="unfinished">显示便签列表</translation>
+        <translation type="unfinished">显示笔记列表</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1448"/>
         <source>Hide notes list</source>
-        <translation type="unfinished">隐藏便签列表</translation>
+        <translation type="unfinished">隐藏笔记列表</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1462"/>
@@ -361,7 +361,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../mainwindow.cpp" line="1503"/>
         <source>Save notes to a file</source>
-        <translation type="unfinished">保存便签到文件</translation>
+        <translation type="unfinished">保存笔记到文件</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1508"/>
@@ -371,7 +371,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../mainwindow.cpp" line="1509"/>
         <source>Add notes from a file</source>
-        <translation type="unfinished">从文件添加便签</translation>
+        <translation type="unfinished">从文件添加笔记</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1514"/>
@@ -417,13 +417,13 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../mainwindow.cpp" line="2318"/>
         <source>Open Notes Backup File</source>
-        <translation type="unfinished">打开便签备份文件</translation>
+        <translation type="unfinished">打开笔记备份文件</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2319"/>
         <location filename="../mainwindow.cpp" line="2387"/>
         <source>Notes Backup File (*.nbk)</source>
-        <translation type="unfinished">便签备份文件(*.nbk)</translation>
+        <translation type="unfinished">笔记备份文件(*.nbk)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2326"/>
@@ -439,7 +439,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../mainwindow.cpp" line="2386"/>
         <source>Save Notes</source>
-        <translation type="unfinished">保存便签</translation>
+        <translation type="unfinished">保存笔记</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3669"/>

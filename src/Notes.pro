@@ -42,9 +42,6 @@ SOURCES += \
     customdocument.cpp \
     editorsettingsbutton.cpp \
     styleeditorwindow.cpp \
-    $$PWD/colorLabel.cpp \
-    $$PWD/domitem.cpp \
-    $$PWD/dommodel.cpp \
     $$PWD/textedit.cpp \
     $$PWD/vscrollbar.cpp \
     $$PWD/lineedit.cpp \
@@ -64,9 +61,6 @@ HEADERS  += \
     editorsettingsbutton.h \
     framelesswindow.h \
     styleeditorwindow.h \
-    colorLabel.h \
-    $$PWD/domitem.h \
-    $$PWD/dommodel.h \
     $$PWD/messagebox.h \
     $$PWD/textedit.h \
     $$PWD/vscrollbar.h \
