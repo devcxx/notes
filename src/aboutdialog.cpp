@@ -69,7 +69,7 @@ AboutDialog::AboutDialog(QWidget* parent)
     ui->lblVersion->setText("0.1.0");
     ui->lblDescription->setText("A copy of Gnome default About dialog, made in Qt.");
 
-    QPixmap pixmap(":images/notes_system_tray_icon.png");
+    QPixmap pixmap(":images/notes.png");
     ui->lblLogo->setPixmap(pixmap.scaled(128, 128));
 
     QFont font = ui->lblProjectTitle->font();

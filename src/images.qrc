@@ -56,5 +56,6 @@
         <file>images/unordered_Hovered.png</file>
         <file>images/unordered_Pressed.png</file>
         <file>images/unordered_Regular.png</file>
+        <file>images/notes.png</file>
     </qresource>
 </RCC>

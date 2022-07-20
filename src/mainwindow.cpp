@@ -432,7 +432,8 @@ void MainWindow::setupTrayIcon()
     m_trayIconMenu->addSeparator();
     m_trayIconMenu->addAction(m_quitAction);
 
-    QIcon icon(QStringLiteral(":images/notes_system_tray_icon.png"));
+    QIcon icon(QStringLiteral(":images/notes.png"));
+    m_trayIcon->setToolTip(QCoreApplication::applicationName());
     m_trayIcon->setIcon(icon);
     m_trayIcon->setContextMenu(m_trayIconMenu);
     m_trayIcon->show();
