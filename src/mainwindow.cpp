@@ -13,6 +13,7 @@
 #include "svgicons.h"
 #include "updaterwindow.h"
 
+#include "aboutdialog.h"
 #include <QDesktopWidget>
 #include <QFileDialog>
 #include <QList>
@@ -1535,7 +1536,8 @@ void MainWindow::onDotsButtonClicked()
     // About Notes
     QAction* aboutAction = mainMenu.addAction(tr("About Notes"));
     connect(aboutAction, &QAction::triggered, this, [&]() {
-        m_aboutWindow.show();
+        //        m_aboutWindow.show();
+        AboutDialog().exec();
     });
 
     mainMenu.addSeparator();

@@ -38,14 +38,15 @@ SOURCES += \
     $$PWD/singleinstance.cpp \
     $$PWD/updaterwindow.cpp \
     $$PWD/dbmanager.cpp \
-    aboutwindow.cpp \
-    customdocument.cpp \
-    editorsettingsbutton.cpp \
-    styleeditorwindow.cpp \
+    $$PWD/aboutwindow.cpp \
+    $$PWD/customdocument.cpp \
+    $$PWD/editorsettingsbutton.cpp \
+    $$PWD/styleeditorwindow.cpp \
     $$PWD/textedit.cpp \
     $$PWD/vscrollbar.cpp \
     $$PWD/lineedit.cpp \
     $$PWD/svgicons.cpp \
+    $$PWD/aboutdialog.cpp \
 
 HEADERS  += \
     $$PWD/mainwindow.h \
@@ -56,30 +57,31 @@ HEADERS  += \
     $$PWD/singleinstance.h \
     $$PWD/updaterwindow.h \
     $$PWD/dbmanager.h \
-    aboutwindow.h \
-    customDocument.h \
-    editorsettingsbutton.h \
-    framelesswindow.h \
-    styleeditorwindow.h \
-    $$PWD/messagebox.h \
+    $$PWD/aboutwindow.h \
+    $$PWD/customDocument.h \
+    $$PWD/editorsettingsbutton.h \
+    $$PWD/framelesswindow.h \
+    $$PWD/styleeditorwindow.h \
     $$PWD/textedit.h \
     $$PWD/vscrollbar.h \
     $$PWD/lineedit.h \
     $$PWD/svgicons.h \
     $$PWD/spinbox.h \
     $$PWD/filedialog.h \
+    $$PWD/aboutdialog.h \
 
 FORMS += \
     $$PWD/mainwindow.ui \
     $$PWD/updaterwindow.ui \
-    aboutwindow.ui \
-    styleeditorwindow.ui
+    $$PWD/aboutwindow.ui \
+    $$PWD/styleeditorwindow.ui \
+    $$PWD/aboutdialog.ui \
 
 RESOURCES += \
     $$PWD/images.qrc \
     $$PWD/fonts.qrc \
     $$PWD/styles.qrc \
-    translations.qrc
+    $$PWD/translations.qrc
 
 linux:!android {
     isEmpty (PREFIX) {
