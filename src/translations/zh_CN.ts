@@ -2,6 +2,59 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_CN">
 <context>
+    <name>AboutDialog</name>
+    <message>
+        <location filename="../aboutdialog.ui" line="26"/>
+        <source>About</source>
+        <translation type="unfinished">关于</translation>
+    </message>
+    <message>
+        <location filename="../aboutdialog.ui" line="56"/>
+        <source>logo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../aboutdialog.ui" line="63"/>
+        <source>project_title</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../aboutdialog.ui" line="90"/>
+        <source>version</source>
+        <translation type="unfinished">版本</translation>
+    </message>
+    <message>
+        <location filename="../aboutdialog.ui" line="97"/>
+        <source>description</source>
+        <translation type="unfinished">描述</translation>
+    </message>
+    <message>
+        <location filename="../aboutdialog.ui" line="104"/>
+        <source>domain</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../aboutdialog.ui" line="148"/>
+        <source>copying</source>
+        <translation type="unfinished">版权</translation>
+    </message>
+    <message>
+        <location filename="../aboutdialog.ui" line="179"/>
+        <source>Credits</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../aboutdialog.ui" line="204"/>
+        <source>License</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../aboutdialog.ui" line="233"/>
+        <source>Close</source>
+        <translation type="unfinished">关闭</translation>
+    </message>
+</context>
+<context>
     <name>AboutWindow</name>
     <message>
         <location filename="../aboutwindow.ui" line="14"/>
@@ -27,7 +80,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../aboutwindow.cpp" line="15"/>
         <source>About</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">关于</translation>
     </message>
 </context>
 <context>
@@ -197,30 +250,17 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
-    <name>FeatherNotes::ColorLabel</name>
-    <message>
-        <location filename="../colorLabel.cpp" line="31"/>
-        <source>Click to change color.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../colorLabel.cpp" line="53"/>
-        <source>Select Color</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>LineEdit</name>
     <message>
         <location filename="../lineedit.cpp" line="33"/>
         <source>Clear text (Ctrl+K)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">清空(Ctrl+K)</translation>
     </message>
     <message>
         <location filename="../lineedit.cpp" line="79"/>
         <source>Ctrl+K</source>
         <comment>Clear text</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ctrl+K</translation>
     </message>
 </context>
 <context>
@@ -231,45 +271,45 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished">笔记</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="265"/>
+        <location filename="../mainwindow.ui" line="249"/>
         <source>Search</source>
         <translation type="unfinished">搜索</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="62"/>
-        <location filename="../mainwindow.cpp" line="189"/>
+        <location filename="../mainwindow.cpp" line="67"/>
+        <location filename="../mainwindow.cpp" line="217"/>
         <source>&amp;Hide Notes</source>
         <translation type="unfinished">&amp;隐藏笔记</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="63"/>
+        <location filename="../mainwindow.cpp" line="68"/>
         <source>&amp;Quit</source>
         <translation type="unfinished">&amp;退出</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="150"/>
+        <location filename="../mainwindow.cpp" line="178"/>
         <source>Migrating database, please wait.</source>
         <translation type="unfinished">合并数据库中，请等待。</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="191"/>
-        <location filename="../mainwindow.cpp" line="2534"/>
-        <location filename="../mainwindow.cpp" line="2556"/>
+        <location filename="../mainwindow.cpp" line="219"/>
+        <location filename="../mainwindow.cpp" line="2579"/>
+        <location filename="../mainwindow.cpp" line="2601"/>
         <source>&amp;Show Notes</source>
         <translation type="unfinished">&amp;显示笔记</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="335"/>
+        <location filename="../mainwindow.cpp" line="363"/>
         <source>Create New Note</source>
         <translation type="unfinished">创建新笔记</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="336"/>
+        <location filename="../mainwindow.cpp" line="364"/>
         <source>Delete Selected Note</source>
         <translation type="unfinished">删除选中笔记</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="337"/>
+        <location filename="../mainwindow.cpp" line="365"/>
         <source>Open Menu</source>
         <translation type="unfinished">打开菜单</translation>
     </message>
@@ -278,227 +318,219 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">编辑器样式</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="338"/>
+        <location filename="../mainwindow.cpp" line="366"/>
         <source>Bold</source>
         <translation type="unfinished">加粗</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="339"/>
+        <location filename="../mainwindow.cpp" line="367"/>
         <source>Italic</source>
         <translation type="unfinished">斜体</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="340"/>
+        <location filename="../mainwindow.cpp" line="368"/>
         <source>Underline</source>
         <translation type="unfinished">下划线</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="341"/>
+        <location filename="../mainwindow.cpp" line="369"/>
         <source>Strike through</source>
         <translation type="unfinished">删除线</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="342"/>
-        <location filename="../mainwindow.cpp" line="3856"/>
+        <location filename="../mainwindow.cpp" line="370"/>
+        <location filename="../mainwindow.cpp" line="3896"/>
         <source>Embed Image</source>
         <translation type="unfinished">插入图片</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1429"/>
+        <location filename="../mainwindow.cpp" line="371"/>
+        <source>Unordered List</source>
+        <translation type="unfinished">列表</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1181"/>
+        <location filename="../mainwindow.cpp" line="1231"/>
+        <source>New Note</source>
+        <translation type="unfinished">新笔记</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1478"/>
         <source>View</source>
         <translation type="unfinished">视图</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1430"/>
+        <location filename="../mainwindow.cpp" line="1479"/>
         <source>Import/Export Notes</source>
         <translation type="unfinished">导入/导出 笔记</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1447"/>
+        <location filename="../mainwindow.cpp" line="1496"/>
         <source>Show notes list</source>
         <translation type="unfinished">显示笔记列表</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1448"/>
+        <location filename="../mainwindow.cpp" line="1497"/>
         <source>Hide notes list</source>
         <translation type="unfinished">隐藏笔记列表</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1462"/>
+        <location filename="../mainwindow.cpp" line="1511"/>
         <source>Disable Markdown</source>
         <translation type="unfinished">禁用Markdown</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1463"/>
+        <location filename="../mainwindow.cpp" line="1512"/>
         <source>Enable Markdown</source>
         <translation type="unfinished">启用Markdown</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1477"/>
+        <location filename="../mainwindow.cpp" line="1526"/>
         <source>Check For Updates</source>
         <translation type="unfinished">检查更新</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1481"/>
+        <location filename="../mainwindow.cpp" line="1530"/>
         <source>Start automatically</source>
         <translation type="unfinished">开机启动</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1489"/>
+        <location filename="../mainwindow.cpp" line="1538"/>
         <source>About Notes</source>
         <translation type="unfinished">关于</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1498"/>
+        <location filename="../mainwindow.cpp" line="1547"/>
         <source>Quit</source>
         <translation type="unfinished">退出</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1502"/>
+        <location filename="../mainwindow.cpp" line="1551"/>
         <source>Export</source>
         <translation type="unfinished">导出</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1503"/>
+        <location filename="../mainwindow.cpp" line="1552"/>
         <source>Save notes to a file</source>
         <translation type="unfinished">保存笔记到文件</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1508"/>
+        <location filename="../mainwindow.cpp" line="1557"/>
         <source>Import</source>
         <translation type="unfinished">导入</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1509"/>
+        <location filename="../mainwindow.cpp" line="1558"/>
         <source>Add notes from a file</source>
         <translation type="unfinished">从文件添加笔记</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1514"/>
+        <location filename="../mainwindow.cpp" line="1563"/>
         <source>Restore</source>
         <translation type="unfinished">恢复</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1515"/>
+        <location filename="../mainwindow.cpp" line="1564"/>
         <source>Replace all notes with notes from a file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1526"/>
+        <location filename="../mainwindow.cpp" line="1575"/>
         <source>Always stay on top</source>
         <translation type="unfinished">窗口置顶</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1527"/>
+        <location filename="../mainwindow.cpp" line="1576"/>
         <source>Always keep the notes application on top of all windows</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1535"/>
-        <source>Use native window frame</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="1536"/>
-        <source>Use the window frame provided by the window manager</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="2298"/>
+        <location filename="../mainwindow.cpp" line="2342"/>
         <source>Warning: All current notes will be lost. Make sure to create a backup copy before proceeding.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2299"/>
-        <location filename="../mainwindow.cpp" line="3670"/>
+        <location filename="../mainwindow.cpp" line="2343"/>
+        <location filename="../mainwindow.cpp" line="3711"/>
         <source>Would you like to continue?</source>
         <translation type="unfinished">是否继续？</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2318"/>
+        <location filename="../mainwindow.cpp" line="2362"/>
         <source>Open Notes Backup File</source>
         <translation type="unfinished">打开笔记备份文件</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2319"/>
-        <location filename="../mainwindow.cpp" line="2387"/>
+        <location filename="../mainwindow.cpp" line="2363"/>
+        <location filename="../mainwindow.cpp" line="2432"/>
         <source>Notes Backup File (*.nbk)</source>
         <translation type="unfinished">笔记备份文件(*.nbk)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2326"/>
-        <location filename="../mainwindow.cpp" line="2393"/>
+        <location filename="../mainwindow.cpp" line="2370"/>
+        <location filename="../mainwindow.cpp" line="2438"/>
         <source>Unable to open file</source>
         <translation type="unfinished">无法打开文件</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2347"/>
+        <location filename="../mainwindow.cpp" line="2391"/>
         <source>Invalid file</source>
         <translation type="unfinished">无效文件</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2386"/>
+        <location filename="../mainwindow.cpp" line="2431"/>
         <source>Save Notes</source>
         <translation type="unfinished">保存笔记</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3669"/>
+        <location filename="../mainwindow.cpp" line="3710"/>
         <source>Warning: After performing this action, you will need to restart your system to revert to custom decoration.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3865"/>
+        <location filename="../mainwindow.cpp" line="3905"/>
         <source>Image path</source>
         <translation type="unfinished">图片路径</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3869"/>
+        <location filename="../mainwindow.cpp" line="3909"/>
         <source>Open image</source>
         <translation type="unfinished">打开图片</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3872"/>
+        <location filename="../mainwindow.cpp" line="3912"/>
         <source>Scale to</source>
         <translation type="unfinished">缩放至</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3876"/>
+        <location filename="../mainwindow.cpp" line="3916"/>
         <source>%</source>
         <translation type="unfinished">%</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3877"/>
+        <location filename="../mainwindow.cpp" line="3917"/>
         <source>Scaling percentage</source>
         <translation type="unfinished">百分比</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3880"/>
+        <location filename="../mainwindow.cpp" line="3920"/>
         <source>Cancel</source>
         <translation type="unfinished">取消</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3881"/>
+        <location filename="../mainwindow.cpp" line="3921"/>
         <source>OK</source>
         <translation type="unfinished">确定</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3944"/>
+        <location filename="../mainwindow.cpp" line="3997"/>
         <source>Open Image...</source>
         <translation type="unfinished">打开图片</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3946"/>
+        <location filename="../mainwindow.cpp" line="3999"/>
         <source>Image Files (*.svg *.png *.jpg *.jpeg *.bmp *.gif);;All Files (*)</source>
         <translation type="unfinished">图片文件 (*.svg *.png *.jpg *.jpeg *.bmp *.gif);;所有文件 (*)</translation>
-    </message>
-</context>
-<context>
-    <name>QObject</name>
-    <message>
-        <location filename="../domitem.cpp" line="98"/>
-        <location filename="../domitem.cpp" line="135"/>
-        <source>New Node</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -556,7 +588,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../3rdParty/qmarkdowntextedit/qplaintexteditsearchwidget.ui" line="193"/>
         <source>Plain text</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">文本</translation>
     </message>
     <message>
         <location filename="../../3rdParty/qmarkdowntextedit/qplaintexteditsearchwidget.ui" line="198"/>

@@ -1178,7 +1178,7 @@ void MainWindow::restoreStates()
 QString MainWindow::getFirstLine(const QString& str)
 {
     if (str.simplified().isEmpty())
-        return "New Note";
+        return tr("New Note");
 
     QString text = str.trimmed();
     QTextStream ts(&text);
@@ -1228,7 +1228,7 @@ NoteData* MainWindow::generateNote(const int noteID)
     QDateTime noteDate = QDateTime::currentDateTime();
     newNote->setCreationDateTime(noteDate);
     newNote->setLastModificationDateTime(noteDate);
-    newNote->setFullTitle(QStringLiteral("New Note"));
+    newNote->setFullTitle(tr("New Note"));
 
     return newNote;
 }
@@ -1523,8 +1523,8 @@ void MainWindow::onDotsButtonClicked()
     //    }
 
     // Check for update action
-    QAction* checkForUpdatesAction = mainMenu.addAction(tr("Check For Updates"));
-    connect(checkForUpdatesAction, &QAction::triggered, this, &MainWindow::checkForUpdates);
+    //    QAction* checkForUpdatesAction = mainMenu.addAction(tr("Check For Updates"));
+    //    connect(checkForUpdatesAction, &QAction::triggered, this, &MainWindow::checkForUpdates);
 
     // Autostart
     QAction* autostartAction = mainMenu.addAction(tr("Start automatically"));

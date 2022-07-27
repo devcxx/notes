@@ -66,7 +66,7 @@ AboutDialog::AboutDialog(QWidget* parent)
 {
     ui->setupUi(this);
 
-    ui->lblVersion->setText("0.1.0");
+    ui->lblVersion->setText(QCoreApplication::applicationVersion());
     ui->lblDescription->setText("A copy of Gnome default About dialog, made in Qt.");
 
     QPixmap pixmap(":images/notes.png");
@@ -75,12 +75,12 @@ AboutDialog::AboutDialog(QWidget* parent)
     QFont font = ui->lblProjectTitle->font();
     font.setBold(true);
     ui->lblProjectTitle->setFont(font);
-    ui->lblProjectTitle->setText("AboutDialog");
+    ui->lblProjectTitle->setText(QCoreApplication::applicationName());
 
     QString domainTxt("<html><head/><body><a href=\"http://%1\">Web page</a></body></html>");
-    ui->lblDomain->setText(domainTxt.arg("www.danielsan.com.br"));
+    //    ui->lblDomain->setText(domainTxt.arg("www.danielsan.com.br"));
 
-    ui->lblCopying->setText(QString("Copyright (c) 2015 %1").arg("Daniel San"));
+    ui->lblCopying->setText(QString("Copyright (c) 2022 %1").arg(QCoreApplication::organizationName()));
 
     ui->txtBws->setVisible(false);
 
