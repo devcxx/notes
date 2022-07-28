@@ -67,7 +67,7 @@ AboutDialog::AboutDialog(QWidget* parent)
     ui->setupUi(this);
 
     ui->lblVersion->setText(QCoreApplication::applicationVersion());
-    ui->lblDescription->setText("A copy of Gnome default About dialog, made in Qt.");
+    ui->lblDescription->setText(tr("Qixing Notes is a completely free, beautiful and easy-to-use, powerful memo and notebook software"));
 
     QPixmap pixmap(":images/notes.png");
     ui->lblLogo->setPixmap(pixmap.scaled(128, 128));
@@ -75,7 +75,7 @@ AboutDialog::AboutDialog(QWidget* parent)
     QFont font = ui->lblProjectTitle->font();
     font.setBold(true);
     ui->lblProjectTitle->setFont(font);
-    ui->lblProjectTitle->setText(QCoreApplication::applicationName());
+    ui->lblProjectTitle->setText(tr("Notes"));
 
     QString domainTxt("<html><head/><body><a href=\"http://%1\">Web page</a></body></html>");
     //    ui->lblDomain->setText(domainTxt.arg("www.danielsan.com.br"));
@@ -83,7 +83,7 @@ AboutDialog::AboutDialog(QWidget* parent)
     ui->lblCopying->setText(QString("Copyright (c) 2022 %1").arg(QCoreApplication::organizationName()));
 
     ui->txtBws->setVisible(false);
-
+    ui->lblDomain->setVisible(false);
     ui->btnCredits->setVisible(false);
     ui->btnLicense->setVisible(false);
     ui->btnClose->setVisible(false);

@@ -53,6 +53,16 @@
         <source>Close</source>
         <translation type="unfinished">关闭</translation>
     </message>
+    <message>
+        <location filename="../aboutdialog.cpp" line="70"/>
+        <source>Qixing Notes is a completely free, beautiful and easy-to-use, powerful memo and notebook software</source>
+        <translation type="unfinished">启星备忘录是一款完全免费、美观易用、功能强大的备忘录和笔记本软件</translation>
+    </message>
+    <message>
+        <location filename="../aboutdialog.cpp" line="78"/>
+        <source>Notes</source>
+        <translation type="unfinished">启星备忘录</translation>
+    </message>
 </context>
 <context>
     <name>AboutWindow</name>
@@ -138,7 +148,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../3rdParty/QSimpleUpdater/src/Downloader.cpp" line="215"/>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">关闭</translation>
     </message>
     <message>
         <location filename="../../3rdParty/QSimpleUpdater/src/Downloader.cpp" line="216"/>
@@ -268,7 +278,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../mainwindow.ui" line="26"/>
         <source>Notes</source>
-        <translation type="unfinished">笔记</translation>
+        <translation type="unfinished">启星备忘录</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="249"/>
@@ -385,9 +395,8 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished">启用Markdown</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1526"/>
         <source>Check For Updates</source>
-        <translation type="unfinished">检查更新</translation>
+        <translation type="obsolete">检查更新</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1530"/>
@@ -743,7 +752,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../updaterwindow.ui" line="479"/>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">关闭</translation>
     </message>
     <message>
         <location filename="../updaterwindow.ui" line="517"/>
@@ -870,6 +879,14 @@ p, li { white-space: pre-wrap; }
         <location filename="../updaterwindow.cpp" line="530"/>
         <source>1 second</source>
         <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>main</name>
+    <message>
+        <location filename="../main.cpp" line="19"/>
+        <source>Notes</source>
+        <translation type="unfinished">启星备忘录</translation>
     </message>
 </context>
 </TS>
