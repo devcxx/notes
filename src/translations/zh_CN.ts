@@ -371,18 +371,18 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1479"/>
-        <source>Import/Export Notes</source>
-        <translation type="unfinished">导入/导出 笔记</translation>
+        <source>Import/Export</source>
+        <translation type="unfinished">导入/导出</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1496"/>
-        <source>Show notes list</source>
-        <translation type="unfinished">显示笔记列表</translation>
+        <source>Show list</source>
+        <translation type="unfinished">显示列表</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1497"/>
-        <source>Hide notes list</source>
-        <translation type="unfinished">隐藏笔记列表</translation>
+        <source>Hide list</source>
+        <translation type="unfinished">隐藏列表</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1511"/>

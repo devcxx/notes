@@ -1476,7 +1476,7 @@ void MainWindow::onDotsButtonClicked()
 
     QMenu mainMenu;
     QMenu* viewMenu = mainMenu.addMenu(tr("View"));
-    QMenu* importExportNotesMenu = mainMenu.addMenu(tr("Import/Export Notes"));
+    QMenu* importExportNotesMenu = mainMenu.addMenu(tr("Import/Export"));
     importExportNotesMenu->setToolTipsVisible(true);
     viewMenu->setToolTipsVisible(true);
     mainMenu.setToolTipsVisible(true);
@@ -1493,8 +1493,8 @@ void MainWindow::onDotsButtonClicked()
 
     // note list visiblity action
     bool isCollapsed = (m_splitter->sizes().at(0) == 0);
-    QString actionLabel = isCollapsed ? tr("Show notes list")
-                                      : tr("Hide notes list");
+    QString actionLabel = isCollapsed ? tr("Show list")
+                                      : tr("Hide list");
 
     QAction* noteListVisbilityAction = viewMenu->addAction(actionLabel);
     noteListVisbilityAction->setShortcut(Qt::CTRL + Qt::Key_J);
