@@ -2626,7 +2626,7 @@ void MainWindow::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
     switch (reason) {
     case QSystemTrayIcon::Trigger:
     case QSystemTrayIcon::DoubleClick:
-        showNormal();
+        show();
         m_restoreAction->setText(tr("&Hide Notes"));
         raise();
         break;

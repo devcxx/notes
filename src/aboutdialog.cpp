@@ -66,6 +66,8 @@ AboutDialog::AboutDialog(QWidget* parent)
 {
     ui->setupUi(this);
 
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
     ui->lblVersion->setText(QCoreApplication::applicationVersion());
     ui->lblDescription->setText(tr("Qixing Notes is a completely free, beautiful and easy-to-use, powerful memo and notebook software"));
 
