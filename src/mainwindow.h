@@ -7,35 +7,35 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QtGui>
-#include <QtCore>
+#include <QAction>
 #include <QGroupBox>
-#include <QPushButton>
-#include <vector>
-#include <QToolButton>
-#include <QVBoxLayout>
 #include <QLabel>
-#include <QTextEdit>
+#include <QMainWindow>
+#include <QMenu>
+#include <QProgressDialog>
+#include <QPushButton>
 #include <QSettings>
 #include <QSplitter>
 #include <QSystemTrayIcon>
-#include <QMenu>
-#include <QProgressDialog>
-#include <QAction>
+#include <QTextEdit>
+#include <QToolButton>
+#include <QVBoxLayout>
+#include <QtCore>
+#include <QtGui>
+#include <vector>
 
 #include <QAutostart>
 
+#include "aboutwindow.h"
+#include "customDocument.h"
+#include "dbmanager.h"
+#include "framelesswindow.h"
+#include "markdownhighlighter.h"
 #include "notedata.h"
 #include "notemodel.h"
 #include "noteview.h"
-#include "updaterwindow.h"
 #include "styleeditorwindow.h"
-#include "dbmanager.h"
-#include "markdownhighlighter.h"
-#include "customDocument.h"
-#include "aboutwindow.h"
-#include "framelesswindow.h"
+#include "updaterwindow.h"
 
 #include "lineedit.h"
 
@@ -43,21 +43,18 @@ namespace Ui {
 class MainWindow;
 }
 
-
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
     friend class tst_MainWindow;
 
 public:
-
-    enum class ShadowType{
+    enum class ShadowType {
         Linear = 0,
         Radial
-        };
+    };
 
-    enum class ShadowSide{
+    enum class ShadowSide {
         Left = 0,
         Right,
         Top,
@@ -66,9 +63,9 @@ public:
         TopRight,
         BottomLeft,
         BottomRight
-        };
+    };
 
-    enum class StretchSide{
+    enum class StretchSide {
         None = 0,
         Left,
         Right,
@@ -78,7 +75,7 @@ public:
         TopRight,
         BottomLeft,
         BottomRight
-        };
+    };
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
     Q_ENUM(ShadowType)
@@ -86,7 +83,7 @@ public:
     Q_ENUM(StretchSide)
 #endif
 
-    explicit MainWindow(QWidget *parent = Q_NULLPTR);
+    explicit MainWindow(QWidget* parent = Q_NULLPTR);
     ~MainWindow() Q_DECL_OVERRIDE;
 
     void setMainWindowVisibility(bool state);
@@ -103,7 +100,6 @@ protected:
     bool eventFilter(QObject* object, QEvent* event) Q_DECL_OVERRIDE;
 
 private:
-
     Ui::MainWindow* ui;
 
     QTimer* m_autoSaveTimer;
@@ -112,7 +108,7 @@ private:
     QPushButton* m_greenMaximizeButton;
     QPushButton* m_redCloseButton;
     QPushButton* m_yellowMinimizeButton;
-//    QHBoxLayout m_trafficLightLayout;
+    //    QHBoxLayout m_trafficLightLayout;
     QPushButton* m_newNoteButton;
     QPushButton* m_trashButton;
     QPushButton* m_dotsButton;
@@ -125,8 +121,8 @@ private:
     CustomDocument* m_textEdit;
     QLineEdit* m_searchEdit;
     QLabel* m_editorDateLabel;
-    QSplitter *m_splitter;
-    bool is_markdown_enabled=true;
+    QSplitter* m_splitter;
+    bool is_markdown_enabled = true;
     QSystemTrayIcon* m_trayIcon;
     QAction* m_restoreAction;
     QAction* m_quitAction;
@@ -134,7 +130,7 @@ private:
 
     bool isX11_, isWayland_;
 
-    LineEdit *ImagePathEntry_;
+    LineEdit* ImagePathEntry_;
     int imgScale_;
     QString lastImgPath_;
 
@@ -147,7 +143,7 @@ private:
     QQueue<QString> m_searchQueue;
     DBManager* m_dbManager;
     QThread* m_dbThread;
-    MarkdownHighlighter *m_highlighter;
+    MarkdownHighlighter* m_highlighter;
 
     UpdaterWindow m_updater;
     StyleEditorWindow m_styleEditorWindow;
@@ -224,18 +220,18 @@ private:
     void setButtonsAndFieldsEnabled(bool doEnable);
     void restoreStates();
     QString getFirstLine(const QString& str);
-    QString getNoteDateEditor (QString dateEdited);
+    QString getNoteDateEditor(QString dateEdited);
     NoteData* generateNote(const int noteID);
     QDateTime getQDateTime(QString date);
     void showNoteInEditor(const QModelIndex& noteIndex);
-    void sortNotesList(QStringList &stringNotesList);
+    void sortNotesList(QStringList& stringNotesList);
     void saveNoteToDB(const QModelIndex& noteIndex);
     void removeNoteFromDB(const QModelIndex& noteIndex);
     void selectFirstNote();
     void moveNoteToTop();
     void clearSearch();
     void highlightSearch() const;
-    void findNotesContain(const QString &keyword);
+    void findNotesContain(const QString& keyword);
     void selectNote(const QModelIndex& noteIndex);
     void checkMigration();
     void executeImport(const bool replace);
@@ -253,8 +249,8 @@ private:
     void setMargins(QMargins margins);
 
     // New
-    void mergeFormatOnWordOrSelection (const QTextCharFormat &format);
-    void formatChanged (const QTextCharFormat &format);
+    void mergeFormatOnWordOrSelection(const QTextCharFormat& format);
+    void formatChanged(const QTextCharFormat& format);
     void makeBold();
     void makeItalic();
     void makeUnderlined();
@@ -262,11 +258,11 @@ private:
     void embedImage();
     void makeUnorderedList();
 
-    void imageEmbed (const QString &path);
+    void imageEmbed(const QString& path);
 
 private slots:
     void InitData();
-    void loadNotes(QList<NoteData *> noteList, int noteCounter);
+    void loadNotes(QList<NoteData*> noteList, int noteCounter);
     void onNewNoteButtonPressed();
     void onNewNoteButtonClicked();
     void onUnorderedButtonPressed();
@@ -285,7 +281,7 @@ private slots:
     void onUnderlineButtonClicked();
     void onStrikeButtonPressed();
     void onStrikeButtonClicked();
-    void onNotePressed(const QModelIndex &index);
+    void onNotePressed(const QModelIndex& index);
     void onTextEditTextChanged();
     void onSearchEditTextChanged(const QString& keyword);
     void onClearButtonClicked();
@@ -295,8 +291,9 @@ private slots:
     void onGreenMaximizeButtonClicked();
     void onYellowMinimizeButtonClicked();
     void onRedCloseButtonClicked();
+    void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
     void createNewNote();
-    void deleteNote(const QModelIndex& noteIndex, bool isFromUser=true);
+    void deleteNote(const QModelIndex& noteIndex, bool isFromUser = true);
     void deleteSelectedNote();
     void setFocusOnCurrentNote();
     void selectNoteDown();
@@ -306,7 +303,7 @@ private slots:
     void maximizeWindow();
     void minimizeWindow();
     void QuitApplication();
-    void checkForUpdates (const bool clicked);
+    void checkForUpdates(const bool clicked);
     void collapseNoteList();
     void expandNoteList();
     void enableMarkdownHighlighter();
@@ -314,7 +311,7 @@ private slots:
     void toggleNoteList();
     void importNotesFile(const bool clicked);
     void exportNotesFile(const bool clicked);
-    void restoreNotesFile (const bool clicked);
+    void restoreNotesFile(const bool clicked);
     void stayOnTop(bool checked);
     void askBeforeSettingNativeWindowFrame();
     void setUseNativeWindowFrame(bool useNativeWindowFrame);
@@ -333,11 +330,11 @@ signals:
     void requestOpenDBManager(QString path, bool doCreate);
     void requestCreateUpdateNote(NoteData* note);
     void requestDeleteNote(NoteData* note);
-    void requestRestoreNotes(QList<NoteData *> noteList);
-    void requestImportNotes(QList<NoteData *> noteList);
+    void requestRestoreNotes(QList<NoteData*> noteList);
+    void requestImportNotes(QList<NoteData*> noteList);
     void requestExportNotes(QString fileName);
-    void requestMigrateNotes(QList<NoteData *> noteList);
-    void requestMigrateTrash(QList<NoteData *> noteList);
+    void requestMigrateNotes(QList<NoteData*> noteList);
+    void requestMigrateTrash(QList<NoteData*> noteList);
     void requestForceLastRowIndexValue(int index);
 };
 

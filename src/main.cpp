@@ -15,10 +15,6 @@ int main(int argc, char* argv[])
     QApplication::setDesktopSettingsAware(false);
     QApplication app(argc, argv);
 
-    // Set application information
-    app.setApplicationName(QCoreApplication::translate("main", "Notes"));
-    app.setApplicationVersion("1.5.0");
-
     // Load fonts from resources
     // Roboto
     QFontDatabase::addApplicationFont(":/fonts/roboto-hinted/Roboto-Bold.ttf");
@@ -115,6 +111,10 @@ int main(int argc, char* argv[])
     if (translator2.load(":/translations/zh_CN")) {
         QCoreApplication::installTranslator(&translator2);
     }
+
+    // Set application information
+    app.setApplicationName(QCoreApplication::translate("main", "Notes"));
+    app.setApplicationVersion("1.5.0");
 
     // Create and Show the app
     MainWindow w;
