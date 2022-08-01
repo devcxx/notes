@@ -324,6 +324,7 @@ private slots:
     void setTheme(Theme theme);
     void createOrSelectFirstNote();
     void setImagePath(bool);
+    void saveSettings();
 
 signals:
     void requestNotesList();
