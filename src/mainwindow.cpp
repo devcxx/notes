@@ -1909,7 +1909,7 @@ void MainWindow::onTextEditTextChanged()
 
             m_autoSaveTimer->start(500);
 
-            setVisibilityOfFrameRightNonEditor(false);
+            //            setVisibilityOfFrameRightNonEditor(false);
         }
 
         m_textEdit->blockSignals(false);
