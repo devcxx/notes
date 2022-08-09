@@ -170,4 +170,5 @@ win32 {
     RC_FILE = $$PWD/images\notes.rc
     SOURCES += \
         framelesswindow.cpp
+    QMAKE_POST_LINK += $$quote($$[QT_INSTALL_BINS]/windeployqt --no-translations --no-system-d3d-compiler --no-compiler-runtime --no-opengl-sw  \"$${DESTDIR}/$${TARGET}.exe\"$$escape_expand(\\n\\t))
 }
