@@ -429,6 +429,10 @@ void MainWindow::setupFonts()
 void MainWindow::setupTrayIcon()
 {
     m_trayIconMenu->addAction(m_restoreAction);
+    m_trayIconMenu->setStyleSheet("QMenu{padding:5px;background:white;border:1px solid gray;}"
+                    "QMenu::item{padding:0px 40px 0px 30px;height:25px;}"
+                    "QMenu::item:selected:!enabled{background:transparent;}"
+                    "QMenu::item:selected:enabled{background:lightgray;color:white;}");
     m_trayIconMenu->addSeparator();
     m_trayIconMenu->addAction(m_quitAction);
 
